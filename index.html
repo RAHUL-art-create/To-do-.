@@ -1,0 +1,810 @@
+<html><head><base href="https://varshit-responsive-skyscape-enhanced-v2.example.com/">
+<title>VARSHIT with Enhanced Dynamic Skyscape and Rainbow</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+  }
+  #container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  #background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: background-color 2s ease;
+  }
+  #name {
+    font-size: 12vw;
+    font-weight: bold;
+    z-index: 10;
+    transition: color 2s ease, text-shadow 2s ease;
+    text-align: center;
+    user-select: none;
+    position: relative;
+  }
+  .celestial-body {
+    position: absolute;
+    border-radius: 50%;
+    top: 10vh;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  #sun {
+    width: 15vmin;
+    height: 15vmin;
+    background: radial-gradient(circle, #ffff00 0%, #ff8c00 100%);
+    box-shadow: 0 0 7vmin #ff8c00;
+  }
+  #moon {
+    width: 12vmin;
+    height: 12vmin;
+    background: radial-gradient(circle, #f0f0f0 0%, #d0d0d0 100%);
+    box-shadow: 0 0 5vmin #d0d0d0;
+    overflow: hidden;
+    transform: rotate(-30deg);
+  }
+  #moon::before {
+    content: '';
+    position: absolute;
+    top: -2%;
+    left: -2%;
+    width: 104%;
+    height: 104%;
+    background: inherit;
+    border-radius: 50%;
+    transition: transform 2s ease;
+  }
+  .cloud {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    filter: blur(5px);
+  }
+  .cloud::before,
+  .cloud::after {
+    content: '';
+    position: absolute;
+    background: inherit;
+    border-radius: inherit;
+  }
+  .cloud::before {
+    width: 60%;
+    height: 60%;
+    top: -30%;
+    left: 10%;
+  }
+  .cloud::after {
+    width: 80%;
+    height: 80%;
+    top: -40%;
+    right: 10%;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  }
+  @keyframes twinkle {
+    from { opacity: 0.5; transform: scale(1); }
+    to { opacity: 1; transform: scale(1.2); }
+  }
+  .trailing-star {
+    position: absolute;
+    background: white;
+    width: 2px;
+    height: 2px;
+    opacity: 0;
+  }
+  .leaf {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 0 C20 20 20 80 50 100 C80 80 80 20 50 0' fill='%2348a642'/%3E%3C/svg%3E");
+    background-size: contain;
+    opacity: 0.7;
+  }
+  #controls {
+    position: absolute;
+    bottom: 5vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #slider {
+    width: 80vw;
+    max-width: 300px;
+    margin: 10px 0;
+  }
+  #timeLabel {
+    font-size: 1rem;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+    margin-top: 5px;
+  }
+  #rainToggle {
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+  }
+  #rainToggle:hover {
+    background-color: #45a049;
+  }
+  #rainbow {
+    position: absolute;
+    width: 200%;
+    height: 200vh;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -75%);
+    border-radius: 50%;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 2s ease;
+  }
+  #rainbow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      circle at 50% 100%,
+      rgba(255, 0, 0, 0) 50%,
+      rgba(255, 0, 0, 0.7) 51%,
+      rgba(255, 165, 0, 0.7) 53%,
+      rgba(255, 255, 0, 0.7) 55%,
+      rgba(0, 128, 0, 0.7) 57%,
+      rgba(0, 0, 255, 0.7) 59%,
+      rgba(75, 0, 130, 0.7) 61%,
+      rgba(238, 130, 238, 0.7) 63%,
+      rgba(238, 130, 238, 0) 65%
+    );
+  }
+  #landscape {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30vh;
+    z-index: 5;
+  }
+  #mountains {
+    transition: fill 2s ease;
+  }
+  #houses {
+    transition: transform 2s ease;
+  }
+  #todo-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 300px;
+    z-index: 100;
+  }
+  #todo-container h2 {
+    margin-top: 0;
+    color: #333;
+  }
+  #todo-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  #todo-list li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  #todo-list input[type="checkbox"] {
+    margin-right: 10px;
+  }
+  .remove-todo {
+    margin-left: 10px;
+    padding: 2px 5px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .todo-date {
+    margin-left: 10px;
+    font-size: 0.8em;
+    color: #666;
+  }
+  #todo-input-container {
+    display: flex;
+    margin-top: 10px;
+  }
+  #todo-input {
+    flex-grow: 1;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px;
+  }
+  #add-todo {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+  }
+  .raindrop {
+    position: absolute;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
+    width: 1px;
+    pointer-events: none;
+  }
+  @media (max-width: 600px) {
+    #name {
+      font-size: 18vw;
+    }
+    #controls {
+      bottom: 2vh;
+    }
+    #slider {
+      width: 90vw;
+    }
+    #rainbow {
+      height: 30vh;
+      top: 35vh;
+    }
+    #landscape {
+      height: 20vh;
+    }
+    #todo-container {
+      top: 10px;
+      right: 10px;
+      left: 10px;
+      max-width: none;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <div id="background"></div>
+  <div id="rainbow"></div>
+  <svg id="landscape" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300">
+    <path id="mountains" d="M0 300 L250 100 L500 250 L750 50 L1000 300 Z" fill="#4b6cb7" />
+    <g id="houses">
+      <rect x="100" y="250" width="50" height="50" fill="#8B4513" />
+      <polygon points="100,250 125,220 150,250" fill="#A52A2A" />
+      <rect x="400" y="270" width="60" height="30" fill="#CD853F" />
+      <polygon points="400,270 430,240 460,270" fill="#D2691E" />
+      <rect x="700" y="260" width="70" height="40" fill="#DEB887" />
+      <polygon points="700,260 735,230 770,260" fill="#F4A460" />
+    </g>
+  </svg>
+  <h1 id="name">VARSHIT</h1>
+  <div id="sun" class="celestial-body"></div>
+  <div id="moon" class="celestial-body"></div>
+</div>
+<div id="controls">
+  <input type="range" id="slider" min="0" max="100" value="0">
+  <span id="timeLabel">Sunrise</span>
+  <button id="rainToggle">Start Rain</button>
+</div>
+<div id="todo-container">
+  <h2>To-Do List</h2>
+  <ul id="todo-list"></ul>
+  <div id="todo-input-container">
+    <input type="text" id="todo-input" placeholder="Add a new task">
+    <button id="add-todo">Add</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+<script>
+const background = document.getElementById('background');
+const name = document.getElementById('name');
+const sun = document.getElementById('sun');
+const moon = document.getElementById('moon');
+const slider = document.getElementById('slider');
+const timeLabel = document.getElementById('timeLabel');
+const container = document.getElementById('container');
+const rainToggle = document.getElementById('rainToggle');
+const rainbow = document.getElementById('rainbow');
+
+let isRaining = false;
+let witches = [];
+
+const colors = {
+  sunrise: {
+    sky: 'linear-gradient(to top, #ff7e5f, #feb47b)',
+    sun: 'radial-gradient(circle, #ffff00 0%, #ff8c00 100%)',
+  },
+  day: {
+    sky: 'linear-gradient(to bottom, #87CEEB, #E0F6FF)',
+    sun: 'radial-gradient(circle, #ffff00 0%, #ffd700 100%)',
+  },
+  sunset: {
+    sky: 'linear-gradient(to bottom, #FF4500, #FF6347)',
+    sun: 'radial-gradient(circle, #ff4500 0%, #ff6347 100%)',
+  },
+  night: {
+    sky: 'linear-gradient(to bottom, #191970, #000033)',
+    moon: 'radial-gradient(circle, #f0f0f0 0%, #d0d0d0 100%)',
+  }
+};
+
+function getContrastColor(hexcolor) {
+  hexcolor = hexcolor.replace("#", "");
+  const r = parseInt(hexcolor.substr(0,2),16);
+  const g = parseInt(hexcolor.substr(2,2),16);
+  const b = parseInt(hexcolor.substr(4,2),16);
+  const yiq = ((r*299)+(g*587)+(b*114))/1000;
+  return (yiq >= 128) ? 'black' : 'white';
+}
+
+function updateColors(progress) {
+  let skyColor, celestialBody;
+  if (progress < 25) {
+    skyColor = colors.sunrise.sky;
+    celestialBody = colors.sunrise.sun;
+    timeLabel.textContent = "Sunrise";
+  } else if (progress < 50) {
+    skyColor = colors.day.sky;
+    celestialBody = colors.day.sun;
+    timeLabel.textContent = "Day";
+  } else if (progress < 75) {
+    skyColor = colors.sunset.sky;
+    celestialBody = colors.sunset.sun;
+    timeLabel.textContent = "Sunset";
+  } else {
+    skyColor = colors.night.sky;
+    celestialBody = colors.night.moon;
+    timeLabel.textContent = "Night";
+  }
+  background.style.background = skyColor;
+  
+  if (progress < 75) {
+    sun.style.background = celestialBody;
+    sun.style.display = 'block';
+    moon.style.display = 'none';
+  } else {
+    moon.style.background = celestialBody;
+    sun.style.display = 'none';
+    moon.style.display = 'block';
+  }
+
+  const contrastColor = getContrastColor(skyColor.split(',')[1].trim());
+  name.style.color = contrastColor;
+  name.style.textShadow = `2px 2px 4px ${contrastColor === 'white' ? 'black' : 'white'}`;
+}
+
+function createCloud() {
+  const cloud = document.createElement('div');
+  cloud.className = 'cloud';
+  cloud.style.width = Math.random() * 20 + 10 + 'vw';
+  cloud.style.height = cloud.style.width;
+  cloud.style.top = Math.random() * 50 + 'vh';
+  cloud.style.left = -30 + 'vw';
+  cloud.style.opacity = Math.random() * 0.5 + 0.5;
+  container.appendChild(cloud);
+
+  gsap.to(cloud, {
+    left: '120vw',
+    duration: Math.random() * 50 + 40,
+    ease: "none",
+    onComplete: () => {
+      container.removeChild(cloud);
+      createCloud();
+    }
+  });
+}
+
+function createStar() {
+  const star = document.createElement('div');
+  star.className = 'star';
+  star.style.width = Math.random() * 4 + 2 + 'px';
+  star.style.height = star.style.width;
+  star.style.top = Math.random() * window.innerHeight + 'px';
+  star.style.left = Math.random() * window.innerWidth + 'px';
+  container.appendChild(star);
+  return star;
+}
+
+const stars = [];
+for (let i = 0; i < 200; i++) {
+  stars.push(createStar());
+}
+
+function createWitch() {
+  const witch = document.createElement('div');
+  witch.className = 'witch';
+  witch.style.position = 'absolute';
+  witch.style.width = '30px';
+  witch.style.height = '30px';
+  witch.style.backgroundImage = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><path d=\"M50 0 L100 100 L0 100 Z\" fill=\"black\"/></svg>')";
+  witch.style.backgroundSize = 'contain';
+  container.appendChild(witch);
+  return witch;
+}
+
+function animateWitches() {
+  const witches = [];
+  for (let i = 0; i < 5; i++) {
+    const witch = createWitch();
+    witches.push(witch);
+    
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 100 + Math.random() * 50;
+    const duration = 10 + Math.random() * 5;
+    
+    gsap.set(witch, { 
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 4,
+      scale: Math.random() * 0.5 + 0.5
+    });
+    
+    gsap.to(witch, {
+      x: () => window.innerWidth / 2 + Math.cos(angle) * radius,
+      y: () => window.innerHeight / 4 + Math.sin(angle) * radius,
+      rotation: 360,
+      duration: duration,
+      ease: "none",
+      repeat: -1,
+      onUpdate: () => {
+        if (Math.random() < 0.1) {
+          createGlitter(witch);
+        }
+      }
+    });
+  }
+  return witches;
+}
+
+function createGlitter(witch) {
+  const glitter = document.createElement('div');
+  glitter.className = 'glitter';
+  glitter.style.position = 'absolute';
+  glitter.style.width = '3px';
+  glitter.style.height = '3px';
+  glitter.style.backgroundColor = 'white';
+  glitter.style.borderRadius = '50%';
+  container.appendChild(glitter);
+  
+  const witchRect = witch.getBoundingClientRect();
+  const x = witchRect.left + witchRect.width;
+  const y = witchRect.top + witchRect.height / 2;
+  
+  gsap.fromTo(glitter, 
+    { x, y, scale: 0, opacity: 1 },
+    { 
+      x: x + (Math.random() - 0.5) * 50,
+      y: y + (Math.random() - 0.5) * 50,
+      scale: 1, 
+      opacity: 0, 
+      duration: 1, 
+      ease: "power1.out",
+      onComplete: () => container.removeChild(glitter)
+    }
+  );
+}
+
+function createTrailingStar() {
+  const star = document.createElement('div');
+  star.className = 'trailing-star';
+  star.style.left = Math.random() * window.innerWidth + 'px';
+  star.style.top = Math.random() * window.innerHeight / 2 + 'px';
+  container.appendChild(star);
+
+  gsap.to(star, {
+    x: -100 - Math.random() * 100,
+    y: 100 + Math.random() * 100,
+    opacity: 1,
+    duration: 2,
+    ease: "power1.in",
+    onComplete: () => {
+      container.removeChild(star);
+      if (parseInt(slider.value) >= 75) createTrailingStar();
+    }
+  });
+}
+
+function createLeaf() {
+  const leaf = document.createElement('div');
+  leaf.className = 'leaf';
+  leaf.style.left = -10 + 'px';
+  leaf.style.top = Math.random() * window.innerHeight + 'px';
+  container.appendChild(leaf);
+
+  gsap.to(leaf, {
+    x: window.innerWidth + 20,
+    y: '+=100',
+    rotation: Math.random() * 360 * 5,
+    duration: 10 + Math.random() * 5,
+    ease: "power1.inOut",
+    onComplete: () => {
+      container.removeChild(leaf);
+      createLeaf();
+    }
+  });
+}
+
+// Modify the updateScene function to include new features
+function updateScene(progress) {
+  updateColors(progress);
+
+  const mountainColor = progress < 25 ? '#FF9966' :
+                        progress < 50 ? '#4b6cb7' :
+                        progress < 75 ? '#FF6B6B' :
+                        '#1a2a6c';
+  
+  gsap.to('#mountains', { fill: mountainColor, duration: 2 });
+
+  const houseScale = progress < 75 ? 1 : 0.8;
+  const houseY = progress < 75 ? 0 : 10;
+  gsap.to('#houses', { scale: houseScale, y: houseY, duration: 2 });
+
+  const nameY = progress < 75 ? -40 : -20;
+  gsap.to('#name', { y: nameY, duration: 1 });
+
+  if (progress < 75) {
+    gsap.to(sun, {
+      y: -Math.sin((progress / 75) * Math.PI) * 30,
+      duration: 0.5
+    });
+  } else {
+    gsap.to(moon, {
+      y: -Math.sin(((progress - 75) / 25) * Math.PI) * 20,
+      duration: 0.5
+    });
+  }
+
+  const moonPhase = (progress - 75) / 25;
+  gsap.to(moon, {
+    clipPath: `inset(0 ${moonPhase * 100}% 0 0)`,
+    duration: 0.5
+  });
+
+  const cloudOpacity = progress < 75 ? 1 : 0;
+  const starOpacity = progress >= 75 ? 1 : 0;
+  
+  gsap.to('.cloud', { opacity: cloudOpacity, duration: 0.5 });
+  gsap.to('.star', { opacity: starOpacity, duration: 0.5 });
+
+  rainbow.style.opacity = (progress < 75 && isRaining) ? 0.5 : 0;
+
+  if (progress >= 75) {
+    if (witches.length === 0) {
+      witches = animateWitches();
+    }
+    witches.forEach(witch => witch.style.display = 'block');
+    
+    // Create trailing stars
+    if (Math.random() < 0.1) createTrailingStar();
+  } else {
+    witches.forEach(witch => {
+      witch.style.display = 'none';
+    });
+  }
+}
+
+slider.addEventListener('input', () => {
+  const progress = slider.value;
+  updateScene(progress);
+});
+
+// Initial setup
+updateScene(0);
+for (let i = 0; i < 15; i++) {
+  createCloud();
+}
+
+// Create initial leaves
+for (let i = 0; i < 10; i++) {
+  createLeaf();
+}
+
+// Responsive design
+window.addEventListener('resize', () => {
+  updateScene(slider.value);
+});
+
+// Rain feature
+function toggleRain() {
+  isRaining = !isRaining;
+  if (isRaining) {
+    createRain();
+    rainToggle.textContent = "Stop Rain";
+    if (parseInt(slider.value) < 75) {
+      rainbow.style.opacity = 0.7;
+    }
+  } else {
+    stopRain();
+    rainToggle.textContent = "Start Rain";
+    rainbow.style.opacity = 0;
+  }
+}
+
+function createRain() {
+  for (let i = 0; i < 100; i++) {
+    createRaindrop();
+  }
+}
+
+function createRaindrop() {
+  const raindrop = document.createElement('div');
+  raindrop.className = 'raindrop';
+  raindrop.style.left = Math.random() * window.innerWidth + 'px';
+  raindrop.style.top = -10 + 'px';
+  raindrop.style.height = Math.random() * 20 + 10 + 'px';
+  container.appendChild(raindrop);
+
+  gsap.to(raindrop, {
+    y: window.innerHeight + 10,
+    duration: Math.random() * 1 + 0.5,
+    ease: "none",
+    onComplete: () => {
+      container.removeChild(raindrop);
+      if (isRaining) createRaindrop();
+    }
+  });
+}
+
+function stopRain() {
+  const raindrops = document.querySelectorAll('.raindrop');
+  raindrops.forEach(raindrop => {
+    gsap.killTweensOf(raindrop);
+    container.removeChild(raindrop);
+  });
+}
+
+rainToggle.addEventListener('click', toggleRain);
+
+// Easter egg: Double-click name to make it dance
+name.addEventListener('dblclick', () => {
+  gsap.to(name, {
+    rotation: 360,
+    scale: 1.2,
+    duration: 0.5,
+    yoyo: true,
+    repeat: 1,
+    ease: "elastic.out(1, 0.3)"
+  });
+});
+
+// Add touch events for mobile devices
+let touchStartX = 0;
+let touchEndX = 0;
+
+container.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+container.addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+});
+
+function handleSwipe() {
+  const swipeThreshold = 50;
+  if (touchEndX < touchStartX - swipeThreshold) {
+    slider.value = Math.min(100, parseInt(slider.value) + 10);
+  } else if (touchEndX > touchStartX + swipeThreshold) {
+    slider.value = Math.max(0, parseInt(slider.value) - 10);
+  }
+  updateScene(slider.value);
+}
+
+// To-Do List functionality
+const todoList = document.getElementById('todo-list');
+const todoInput = document.getElementById('todo-input');
+const addTodoButton = document.getElementById('add-todo');
+
+function addTodo() {
+  const todoText = todoInput.value.trim();
+  if (todoText) {
+    const li = document.createElement('li');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    const label = document.createElement('label');
+    label.textContent = todoText;
+    const removeButton = document.createElement('button');
+    removeButton.textContent = 'Remove';
+    removeButton.className = 'remove-todo';
+    const dateSpan = document.createElement('span');
+    dateSpan.className = 'todo-date';
+    dateSpan.textContent = new Date().toLocaleDateString('en-IN');
+
+    li.appendChild(checkbox);
+    li.appendChild(label);
+    li.appendChild(removeButton);
+    li.appendChild(dateSpan);
+    todoList.appendChild(li);
+
+    todoInput.value = '';
+  }
+}
+
+addTodoButton.addEventListener('click', addTodo);
+todoInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    addTodo();
+  }
+});
+
+todoList.addEventListener('click', (e) => {
+  if (e.target.className === 'remove-todo') {
+    e.target.parentElement.remove();
+  }
+});
+
+todoList.addEventListener('change', (e) => {
+  if (e.target.type === 'checkbox') {
+    const label = e.target.nextElementSibling;
+    if (e.target.checked) {
+      label.style.textDecoration = 'line-through';
+    } else {
+      label.style.textDecoration = 'none';
+    }
+  }
+});
+
+// Rainbow animation
+function animateRainbow() {
+  gsap.to(rainbow, {
+    rotation: 360,
+    duration: 60,
+    repeat: -1,
+    ease: "none"
+  });
+}
+
+animateRainbow();
+
+// Set theme based on Indian time
+function setThemeBasedOnIndianTime() {
+  const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+  const indianHour = new Date(indianTime).getHours();
+  
+  let progress;
+  if (indianHour >= 5 && indianHour < 8) {
+    progress = 0; // Sunrise
+  } else if (indianHour >= 8 && indianHour < 17) {
+    progress = 25; // Day
+  } else if (indianHour >= 17 && indianHour < 20) {
+    progress = 50; // Sunset
+  } else {
+    progress = 75; // Night
+  }
+  
+  slider.value = progress;
+  updateScene(progress);
+}
+
+// Call this function when the page loads
+window.addEventListener('load', setThemeBasedOnIndianTime);
+
+// Initialize the scene
+updateScene(0);
+</script>
+</body>
+</html>
