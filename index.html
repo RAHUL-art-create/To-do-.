@@ -1,5 +1,5 @@
 <html><head><base href="https://varshit-responsive-skyscape-enhanced-v2.example.com/">
-<title>TO-Do with Enhanced Dynamic Skyscape and Rainbow</title>
+<title>TO-Do ..</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -72,6 +72,11 @@
     background: rgba(255, 255, 255, 0.8);
     border-radius: 50%;
     filter: blur(5px);
+  }
+  @media (max-width: 600px) {
+    .cloud {
+      filter: blur(3px);
+    }
   }
   .cloud::before,
   .cloud::after {
@@ -162,6 +167,12 @@
     overflow: hidden;
     opacity: 0;
     transition: opacity 2s ease;
+  }
+  @media (max-width: 600px) {
+    #rainbow {
+      height: 30vh;
+      top: 35vh;
+    }
   }
   #rainbow::before {
     content: '';
@@ -372,21 +383,20 @@
     0% { transform: scale(1); opacity: 0.8; }
     100% { transform: scale(2); opacity: 0; }
   }
-  @keyframes shiver {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(1px, 1px) rotate(1deg); }
-    50% { transform: translate(-1px, -1px) rotate(-1deg); }
-    75% { transform: translate(1px, -1px) rotate(1deg); }
-  }
-  @keyframes jump {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+  @keyframes attractParticle {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(var(--targetX), var(--targetY)); }
   }
   .magnetic-wave {
     position: absolute;
     border-radius: 50%;
     pointer-events: none;
     z-index: 9;
+  }
+  .attracted-particle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 8;
   }
 </style>
 </head>
@@ -532,16 +542,19 @@ function updateColors(progress) {
 function createCloud() {
   const cloud = document.createElement('div');
   cloud.className = 'cloud';
-  cloud.style.width = Math.random() * 20 + 10 + 'vw';
+  
+  const isMobile = window.innerWidth <= 600;
+  
+  cloud.style.width = isMobile ? (Math.random() * 15 + 10 + 'vw') : (Math.random() * 20 + 10 + 'vw');
   cloud.style.height = cloud.style.width;
-  cloud.style.top = Math.random() * 50 + 'vh';
+  cloud.style.top = Math.random() * (isMobile ? 30 : 50) + 'vh';
   cloud.style.left = -30 + 'vw';
   cloud.style.opacity = Math.random() * 0.5 + 0.5;
   container.appendChild(cloud);
 
   gsap.to(cloud, {
     left: '120vw',
-    duration: Math.random() * 50 + 40,
+    duration: isMobile ? (Math.random() * 30 + 20) : (Math.random() * 50 + 40),
     ease: "none",
     onComplete: () => {
       container.removeChild(cloud);
@@ -777,6 +790,20 @@ shareSelectedTasksBtn.addEventListener('click', () => {
   multiShareModal.style.display = 'block';
 });
 
+function loadSharedTasks() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedData = urlParams.get('share');
+  
+  if (sharedData) {
+    try {
+      const sharedTasks = JSON.parse(atob(sharedData));
+      sharedTasks.forEach(task => createTodoItem(task.text, task.checked));
+    } catch (error) {
+      console.error('Error loading shared tasks:', error);
+    }
+  }
+}
+
 copyMultiLinkBtn.addEventListener('click', () => {
   multiShareLink.select();
   document.execCommand('copy');
@@ -816,15 +843,52 @@ function createMagneticWave(x, y, color) {
   setTimeout(() => container.removeChild(wave), 1500);
 }
 
+function createAttractedParticle(type) {
+  const particle = document.createElement('div');
+  particle.className = 'attracted-particle';
+  particle.style.width = '5px';
+  particle.style.height = '5px';
+  particle.style.backgroundColor = type === 'dust' ? '#8B4513' :
+                                   type === 'cloud' ? 'white' : '#48a642';
+  particle.style.left = `${Math.random() * window.innerWidth}px`;
+  particle.style.top = `${Math.random() * window.innerHeight}px`;
+  container.appendChild(particle);
+  return particle;
+}
+
 function animateName() {
-  const contrastColor = getContrastColor(background.style.background.split(',')[1].trim());
+  const rect = name.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
   for (let i = 0; i < 5; i++) {
     setTimeout(() => {
-      const rect = name.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-      createMagneticWave(x, y, contrastColor);
+      const waveColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      createMagneticWave(centerX, centerY, waveColor);
     }, i * 300);
+  }
+
+  for (let i = 0; i < 20; i++) {
+    const types = ['dust', 'cloud', 'leaf'];
+    const particle = createAttractedParticle(types[i % 3]);
+    const startX = parseFloat(particle.style.left);
+    const startY = parseFloat(particle.style.top);
+    const targetX = centerX - startX;
+    const targetY = centerY - startY;
+
+    particle.style.setProperty('--targetX', `${targetX}px`);
+    particle.style.setProperty('--targetY', `${targetY}px`);
+
+    gsap.to(particle, {
+      duration: 1.5,
+      ease: "power2.in",
+      onStart: () => {
+        particle.style.animation = 'attractParticle 1.5s ease-in forwards';
+      },
+      onComplete: () => {
+        container.removeChild(particle);
+      }
+    });
   }
 
   gsap.to(name, {
@@ -843,12 +907,6 @@ function animateName() {
       { duration: 0.5, y: 0, ease: "bounce.out" }
     ]
   });
-
-  const originalColor = name.style.color;
-  name.style.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-  setTimeout(() => {
-    name.style.color = originalColor;
-  }, 1500);
 }
 
 name.addEventListener('dblclick', animateName);
@@ -1042,18 +1100,7 @@ function loadCustomName() {
 
 window.addEventListener('load', () => {
   loadCustomName();
-  const urlParams = new URLSearchParams(window.location.search);
-  const sharedData = urlParams.get('share');
-  
-  if (sharedData) {
-    try {
-      const sharedTasks = JSON.parse(atob(sharedData));
-      sharedTasks.forEach(task => createTodoItem(task.text, task.checked));
-    } catch (error) {
-      console.error('Error loading shared tasks:', error);
-    }
-  }
-
+  loadSharedTasks();
   setThemeBasedOnIndianTime();
 });
 
