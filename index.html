@@ -1,6 +1,7 @@
 <html><head><base href="https://varshit-responsive-skyscape-enhanced-v2.example.com/">
-<title>VARSHIT with Enhanced Dynamic Skyscape and Rainbow</title>
+<title>TO-Do with Enhanced Dynamic Skyscape and Rainbow</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
   body, html {
     margin: 0;
@@ -196,13 +197,17 @@
   #houses {
     transition: transform 2s ease;
   }
+  #vegetation {
+    transition: fill 2s ease;
+  }
   #todo-container {
     position: absolute;
     top: 20px;
     right: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    border-radius: 10px;
     max-width: 300px;
     z-index: 100;
   }
@@ -215,9 +220,17 @@
     padding: 0;
   }
   #todo-list li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 5px;
+    transition: background-color 0.3s;
+  }
+  #todo-list li:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+  #todo-list li input[type="checkbox"] {
+    margin-right: 10px;
   }
   #todo-list input[type="checkbox"] {
     margin-right: 10px;
@@ -254,15 +267,52 @@
     border-radius: 0 5px 5px 0;
     cursor: pointer;
   }
-  .raindrop {
-    position: absolute;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
-    width: 1px;
-    pointer-events: none;
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+  }
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+  }
+  #multi-share-link {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 5px;
+  }
+  #copy-multi-link, #close-multi-modal {
+    padding: 5px 10px;
+    margin-right: 10px;
+  }
+  .selected-task {
+    background-color: #e0f7fa !important;
+  }
+  #share-selected-tasks {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
   }
   @media (max-width: 600px) {
     #name {
       font-size: 18vw;
+    }
+    #sun, #moon {
+      top: 25vh;
     }
     #controls {
       bottom: 2vh;
@@ -283,6 +333,60 @@
       left: 10px;
       max-width: none;
     }
+    .modal-content {
+      width: 95%;
+      margin: 10% auto;
+    }
+  }
+  #name[contenteditable="true"] {
+    border-bottom: 2px solid white;
+    padding-bottom: 5px;
+  }
+  .raindrop {
+    position: absolute;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.6));
+    pointer-events: none;
+  }
+  @keyframes flowAnimation {
+    0% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: -50;
+    }
+  }
+  #stream1, #stream2, #stream3 {
+    stroke-dasharray: 5, 5;
+    animation: flowAnimation 2s linear infinite;
+  }
+  #stream1 {
+    animation-duration: 3s;
+  }
+  #stream2 {
+    animation-duration: 2.5s;
+  }
+  #stream3 {
+    animation-duration: 3.5s;
+  }
+  @keyframes magneticWave {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+  @keyframes shiver {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(1px, 1px) rotate(1deg); }
+    50% { transform: translate(-1px, -1px) rotate(-1deg); }
+    75% { transform: translate(1px, -1px) rotate(1deg); }
+  }
+  @keyframes jump {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .magnetic-wave {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9;
   }
 </style>
 </head>
@@ -292,6 +396,7 @@
   <div id="rainbow"></div>
   <svg id="landscape" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300">
     <path id="mountains" d="M0 300 L250 100 L500 250 L750 50 L1000 300 Z" fill="#4b6cb7" />
+    <path id="vegetation" d="M0 300 Q250 250, 500 300 T1000 300" fill="#228B22" fill-opacity="0.5" />
     <g id="houses">
       <rect x="100" y="250" width="50" height="50" fill="#8B4513" />
       <polygon points="100,250 125,220 150,250" fill="#A52A2A" />
@@ -300,6 +405,9 @@
       <rect x="700" y="260" width="70" height="40" fill="#DEB887" />
       <polygon points="700,260 735,230 770,260" fill="#F4A460" />
     </g>
+    <path id="stream1" d="M250 100 Q300 200, 350 300" fill="none" stroke="#4FC3F7" stroke-width="5" />
+    <path id="stream2" d="M500 250 Q550 275, 600 300" fill="none" stroke="#4FC3F7" stroke-width="5" />
+    <path id="stream3" d="M750 50 Q800 175, 850 300" fill="none" stroke="#4FC3F7" stroke-width="5" />
   </svg>
   <h1 id="name">VARSHIT</h1>
   <div id="sun" class="celestial-body"></div>
@@ -317,10 +425,25 @@
     <input type="text" id="todo-input" placeholder="Add a new task">
     <button id="add-todo">Add</button>
   </div>
+  <button id="share-selected-tasks" style="display: none;">Share Selected Tasks</button>
+</div>
+<div id="multi-share-modal" class="modal">
+  <div class="modal-content">
+    <h3>Share Selected Tasks</h3>
+    <p>Copy this link to share the selected tasks:</p>
+    <input type="text" id="multi-share-link" readonly>
+    <button id="copy-multi-link">Copy Link</button>
+    <button id="close-multi-modal">Close</button>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
 <script>
+let longPressTimer;
+let isEditingName = false;
+let witches = [];
+let selectionTimer;
+
 const background = document.getElementById('background');
 const name = document.getElementById('name');
 const sun = document.getElementById('sun');
@@ -330,9 +453,17 @@ const timeLabel = document.getElementById('timeLabel');
 const container = document.getElementById('container');
 const rainToggle = document.getElementById('rainToggle');
 const rainbow = document.getElementById('rainbow');
+const todoList = document.getElementById('todo-list');
+const todoInput = document.getElementById('todo-input');
+const addTodoButton = document.getElementById('add-todo');
 
 let isRaining = false;
-let witches = [];
+let selectedTasks = [];
+const shareSelectedTasksBtn = document.getElementById('share-selected-tasks');
+const multiShareModal = document.getElementById('multi-share-modal');
+const multiShareLink = document.getElementById('multi-share-link');
+const copyMultiLinkBtn = document.getElementById('copy-multi-link');
+const closeMultiModalBtn = document.getElementById('close-multi-modal');
 
 const colors = {
   sunrise: {
@@ -345,7 +476,7 @@ const colors = {
   },
   sunset: {
     sky: 'linear-gradient(to bottom, #FF4500, #FF6347)',
-    sun: 'radial-gradient(circle, #ff4500 0%, #ff6347 100%)',
+    sun: 'radial-gradient(circle, #FFD700 0%, #FF6347 100%)',
   },
   night: {
     sky: 'linear-gradient(to bottom, #191970, #000033)',
@@ -382,7 +513,7 @@ function updateColors(progress) {
     timeLabel.textContent = "Night";
   }
   background.style.background = skyColor;
-  
+
   if (progress < 75) {
     sun.style.background = celestialBody;
     sun.style.display = 'block';
@@ -448,10 +579,10 @@ function createWitch() {
 }
 
 function animateWitches() {
-  const witches = [];
+  const createdWitches = [];
   for (let i = 0; i < 5; i++) {
     const witch = createWitch();
-    witches.push(witch);
+    createdWitches.push(witch);
     
     const angle = Math.random() * Math.PI * 2;
     const radius = 100 + Math.random() * 50;
@@ -477,7 +608,7 @@ function animateWitches() {
       }
     });
   }
-  return witches;
+  return createdWitches;
 }
 
 function createGlitter(witch) {
@@ -512,7 +643,7 @@ function createTrailingStar() {
   const star = document.createElement('div');
   star.className = 'trailing-star';
   star.style.left = Math.random() * window.innerWidth + 'px';
-  star.style.top = Math.random() * window.innerHeight / 2 + 'px';
+  star.style.top = Math.random() * window.innerHeight + 'px';
   container.appendChild(star);
 
   gsap.to(star, {
@@ -548,7 +679,180 @@ function createLeaf() {
   });
 }
 
-// Modify the updateScene function to include new features
+function addTodo() {
+  const todoText = todoInput.value.trim();
+  if (todoText) {
+    createTodoItem(todoText);
+    todoInput.value = '';
+  }
+}
+
+function createTodoItem(todoText, checked = false) {
+  const li = document.createElement('li');
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.checked = checked;
+  const label = document.createElement('label');
+  label.textContent = todoText;
+  const removeButton = document.createElement('button');
+  removeButton.textContent = 'Remove';
+  removeButton.className = 'remove-todo';
+  const dateSpan = document.createElement('span');
+  dateSpan.className = 'todo-date';
+  dateSpan.textContent = new Date().toLocaleDateString('en-IN');
+  
+  li.appendChild(checkbox);
+  li.appendChild(label);
+  li.appendChild(removeButton);
+  li.appendChild(dateSpan);
+  todoList.appendChild(li);
+
+  li.addEventListener('touchstart', handleTaskLongPress);
+  li.addEventListener('touchend', clearTaskLongPress);
+  li.addEventListener('mousedown', handleTaskLongPress);
+  li.addEventListener('mouseup', clearTaskLongPress);
+  li.addEventListener('mouseleave', clearTaskLongPress);
+
+  if (checked) {
+    label.style.textDecoration = 'line-through';
+  }
+
+  removeButton.addEventListener('click', function() {
+    todoList.removeChild(li);
+  });
+
+  checkbox.addEventListener('change', function() {
+    if (this.checked) {
+      label.style.textDecoration = 'line-through';
+    } else {
+      label.style.textDecoration = 'none';
+    }
+  });
+}
+
+function handleTaskLongPress(event) {
+  event.preventDefault();
+  const li = event.currentTarget;
+  selectionTimer = setTimeout(() => {
+    toggleTaskSelection(li);
+    enableQuickSelect();
+  }, 1000);
+}
+
+function clearTaskLongPress(event) {
+  event.preventDefault();
+  clearTimeout(selectionTimer);
+}
+
+function enableQuickSelect() {
+  const tasks = document.querySelectorAll('#todo-list li');
+  tasks.forEach(task => {
+    task.removeEventListener('touchstart', handleTaskLongPress);
+    task.removeEventListener('mousedown', handleTaskLongPress);
+    task.addEventListener('click', quickSelectTask);
+  });
+}
+
+function quickSelectTask(event) {
+  if (!event.target.classList.contains('remove-todo')) {
+    toggleTaskSelection(this);
+  }
+}
+
+function toggleTaskSelection(taskElement) {
+  taskElement.classList.toggle('selected-task');
+  updateSelectedTasks();
+}
+
+function updateSelectedTasks() {
+  selectedTasks = Array.from(document.querySelectorAll('.selected-task')).map(task => task.querySelector('label').textContent);
+  shareSelectedTasksBtn.style.display = selectedTasks.length > 0 ? 'block' : 'none';
+}
+
+shareSelectedTasksBtn.addEventListener('click', () => {
+  const tasksToShare = selectedTasks.map(task => ({ text: task, checked: false }));
+  const sharedData = btoa(JSON.stringify(tasksToShare));
+  const shareUrl = `${window.location.origin}${window.location.pathname}?share=${sharedData}`;
+  multiShareLink.value = shareUrl;
+  multiShareModal.style.display = 'block';
+});
+
+copyMultiLinkBtn.addEventListener('click', () => {
+  multiShareLink.select();
+  document.execCommand('copy');
+});
+
+closeMultiModalBtn.addEventListener('click', () => {
+  multiShareModal.style.display = 'none';
+});
+
+addTodoButton.addEventListener('click', addTodo);
+
+todoInput.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    addTodo();
+  }
+});
+
+function adjustNameSize() {
+  const nameElement = document.getElementById('name');
+  if (nameElement.textContent.length > 8) {
+    nameElement.style.fontSize = '6vw'; // Reduced size for longer names
+  } else {
+    nameElement.style.fontSize = '12vw';
+  }
+}
+
+function createMagneticWave(x, y, color) {
+  const wave = document.createElement('div');
+  wave.className = 'magnetic-wave';
+  wave.style.left = x + 'px';
+  wave.style.top = y + 'px';
+  wave.style.width = '10px';
+  wave.style.height = '10px';
+  wave.style.border = `2px solid ${color}`;
+  wave.style.animation = 'magneticWave 1.5s ease-out';
+  container.appendChild(wave);
+  setTimeout(() => container.removeChild(wave), 1500);
+}
+
+function animateName() {
+  const contrastColor = getContrastColor(background.style.background.split(',')[1].trim());
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      const rect = name.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      createMagneticWave(x, y, contrastColor);
+    }, i * 300);
+  }
+
+  gsap.to(name, {
+    keyframes: [
+      { duration: 0.1, scale: 1.1, ease: "power1.inOut" },
+      { duration: 0.1, scale: 1, ease: "power1.inOut" },
+      { duration: 0.3, rotation: 5, ease: "elastic.out(1, 0.3)" },
+      { duration: 0.3, rotation: -5, ease: "elastic.out(1, 0.3)" },
+      { duration: 0.3, rotation: 0, ease: "elastic.out(1, 0.3)" }
+    ]
+  });
+
+  gsap.to(name, {
+    keyframes: [
+      { duration: 0.5, y: -10, ease: "power1.out" },
+      { duration: 0.5, y: 0, ease: "bounce.out" }
+    ]
+  });
+
+  const originalColor = name.style.color;
+  name.style.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+  setTimeout(() => {
+    name.style.color = originalColor;
+  }, 1500);
+}
+
+name.addEventListener('dblclick', animateName);
+
 function updateScene(progress) {
   updateColors(progress);
 
@@ -592,13 +896,18 @@ function updateScene(progress) {
 
   rainbow.style.opacity = (progress < 75 && isRaining) ? 0.5 : 0;
 
+  const streamColor = progress < 25 ? '#87CEFA' :
+                      progress < 50 ? '#4FC3F7' :
+                      progress < 75 ? '#0288D1' :
+                      '#01579B';
+  gsap.to('#stream1, #stream2, #stream3', { stroke: streamColor, duration: 2 });
+
   if (progress >= 75) {
     if (witches.length === 0) {
       witches = animateWitches();
     }
     witches.forEach(witch => witch.style.display = 'block');
     
-    // Create trailing stars
     if (Math.random() < 0.1) createTrailingStar();
   } else {
     witches.forEach(witch => {
@@ -632,7 +941,9 @@ window.addEventListener('resize', () => {
 function toggleRain() {
   isRaining = !isRaining;
   if (isRaining) {
-    createRain();
+    for (let i = 0; i < 100; i++) {
+      createRaindrop();
+    }
     rainToggle.textContent = "Stop Rain";
     if (parseInt(slider.value) < 75) {
       rainbow.style.opacity = 0.7;
@@ -644,18 +955,15 @@ function toggleRain() {
   }
 }
 
-function createRain() {
-  for (let i = 0; i < 100; i++) {
-    createRaindrop();
-  }
-}
-
 function createRaindrop() {
   const raindrop = document.createElement('div');
   raindrop.className = 'raindrop';
+  raindrop.style.position = 'absolute';
   raindrop.style.left = Math.random() * window.innerWidth + 'px';
   raindrop.style.top = -10 + 'px';
+  raindrop.style.width = '2px';
   raindrop.style.height = Math.random() * 20 + 10 + 'px';
+  raindrop.style.background = 'linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.6))';
   container.appendChild(raindrop);
 
   gsap.to(raindrop, {
@@ -680,92 +988,73 @@ function stopRain() {
 rainToggle.addEventListener('click', toggleRain);
 
 // Easter egg: Double-click name to make it dance
-name.addEventListener('dblclick', () => {
-  gsap.to(name, {
-    rotation: 360,
-    scale: 1.2,
-    duration: 0.5,
-    yoyo: true,
-    repeat: 1,
-    ease: "elastic.out(1, 0.3)"
-  });
-});
+name.addEventListener('touchstart', handleNameLongPressStart);
+name.addEventListener('touchend', handleNameLongPressEnd);
+name.addEventListener('mousedown', handleNameLongPressStart);
+name.addEventListener('mouseup', handleNameLongPressEnd);
+name.addEventListener('blur', finishNameEdit);
 
-// Add touch events for mobile devices
-let touchStartX = 0;
-let touchEndX = 0;
-
-container.addEventListener('touchstart', (e) => {
-  touchStartX = e.changedTouches[0].screenX;
-});
-
-container.addEventListener('touchend', (e) => {
-  touchEndX = e.changedTouches[0].screenX;
-  handleSwipe();
-});
-
-function handleSwipe() {
-  const swipeThreshold = 50;
-  if (touchEndX < touchStartX - swipeThreshold) {
-    slider.value = Math.min(100, parseInt(slider.value) + 10);
-  } else if (touchEndX > touchStartX + swipeThreshold) {
-    slider.value = Math.max(0, parseInt(slider.value) - 10);
-  }
-  updateScene(slider.value);
+function handleNameLongPressStart() {
+  longPressTimer = setTimeout(() => {
+    makeNameEditable();
+  }, 3000); // 3 seconds
 }
 
-// To-Do List functionality
-const todoList = document.getElementById('todo-list');
-const todoInput = document.getElementById('todo-input');
-const addTodoButton = document.getElementById('add-todo');
+function handleNameLongPressEnd() {
+  clearTimeout(longPressTimer);
+}
 
-function addTodo() {
-  const todoText = todoInput.value.trim();
-  if (todoText) {
-    const li = document.createElement('li');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    const label = document.createElement('label');
-    label.textContent = todoText;
-    const removeButton = document.createElement('button');
-    removeButton.textContent = 'Remove';
-    removeButton.className = 'remove-todo';
-    const dateSpan = document.createElement('span');
-    dateSpan.className = 'todo-date';
-    dateSpan.textContent = new Date().toLocaleDateString('en-IN');
-
-    li.appendChild(checkbox);
-    li.appendChild(label);
-    li.appendChild(removeButton);
-    li.appendChild(dateSpan);
-    todoList.appendChild(li);
-
-    todoInput.value = '';
+function makeNameEditable() {
+  if (!isEditingName) {
+    isEditingName = true;
+    name.contentEditable = true;
+    name.focus();
+    
+    const range = document.createRange();
+    range.selectNodeContents(name);
+    range.collapse(false);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
   }
 }
 
-addTodoButton.addEventListener('click', addTodo);
-todoInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') {
-    addTodo();
+function finishNameEdit() {
+  if (isEditingName) {
+    isEditingName = false;
+    name.contentEditable = false;
+    saveCustomName();
+    adjustNameSize();
   }
-});
+}
 
-todoList.addEventListener('click', (e) => {
-  if (e.target.className === 'remove-todo') {
-    e.target.parentElement.remove();
+function saveCustomName() {
+  localStorage.setItem('customName', name.textContent);
+}
+
+function loadCustomName() {
+  const customName = localStorage.getItem('customName');
+  if (customName) {
+    name.textContent = customName;
   }
-});
+  adjustNameSize();
+}
 
-todoList.addEventListener('change', (e) => {
-  if (e.target.type === 'checkbox') {
-    const label = e.target.nextElementSibling;
-    if (e.target.checked) {
-      label.style.textDecoration = 'line-through';
-    } else {
-      label.style.textDecoration = 'none';
+window.addEventListener('load', () => {
+  loadCustomName();
+  const urlParams = new URLSearchParams(window.location.search);
+  const sharedData = urlParams.get('share');
+  
+  if (sharedData) {
+    try {
+      const sharedTasks = JSON.parse(atob(sharedData));
+      sharedTasks.forEach(task => createTodoItem(task.text, task.checked));
+    } catch (error) {
+      console.error('Error loading shared tasks:', error);
     }
   }
+
+  setThemeBasedOnIndianTime();
 });
 
 // Rainbow animation
@@ -784,14 +1073,15 @@ animateRainbow();
 function setThemeBasedOnIndianTime() {
   const indianTime = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
   const indianHour = new Date(indianTime).getHours();
+  const indianMinute = new Date(indianTime).getMinutes();
   
   let progress;
   if (indianHour >= 5 && indianHour < 8) {
     progress = 0; // Sunrise
-  } else if (indianHour >= 8 && indianHour < 17) {
+  } else if (indianHour >= 8 && indianHour < 16) {
     progress = 25; // Day
-  } else if (indianHour >= 17 && indianHour < 20) {
-    progress = 50; // Sunset
+  } else if ((indianHour === 16 && indianMinute >= 0) || (indianHour > 16 && indianHour < 18) || (indianHour === 18 && indianMinute <= 30)) {
+    progress = 50; // Sunset (4:00 PM to 6:30 PM)
   } else {
     progress = 75; // Night
   }
