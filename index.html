@@ -1,5 +1,5 @@
 <html><head><base href="https://varshit-responsive-skyscape-enhanced-v2.example.com/">
-<title>TO-Do with Name Customization.. </title>
+<title>VARSHIT with Enhanced Dynamic Skyscape and Rainbow</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -317,6 +317,86 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+  }
+  @media (max-width: 600px) {
+    #name {
+      font-size: 18vw;
+    }
+    #sun, #moon {
+      top: 25vh;
+    }
+    #controls {
+      bottom: 2vh;
+    }
+    #slider {
+      width: 90vw;
+    }
+    #rainbow {
+      height: 30vh;
+      top: 35vh;
+    }
+    #landscape {
+      height: 20vh;
+    }
+    #todo-container {
+      top: 10px;
+      right: 10px;
+      left: 10px;
+      max-width: none;
+    }
+    .modal-content {
+      width: 95%;
+      margin: 10% auto;
+    }
+  }
+  #name[contenteditable="true"] {
+    border-bottom: 2px solid white;
+    padding-bottom: 5px;
+  }
+  .raindrop {
+    position: absolute;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.6));
+    pointer-events: none;
+  }
+  @keyframes flowAnimation {
+    0% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: -50;
+    }
+  }
+  #stream1, #stream2, #stream3 {
+    stroke-dasharray: 5, 5;
+    animation: flowAnimation 2s linear infinite;
+  }
+  #stream1 {
+    animation-duration: 3s;
+  }
+  #stream2 {
+    animation-duration: 2.5s;
+  }
+  #stream3 {
+    animation-duration: 3.5s;
+  }
+  @keyframes magneticWave {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+  @keyframes attractParticle {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(var(--targetX), var(--targetY)); }
+  }
+  .magnetic-wave {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9;
+  }
+  .attracted-particle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 8;
   }
   .new-label {
     background-color: #4CAF50;
@@ -654,6 +734,7 @@ function createTodoItem(todoText, checked = false) {
   li.appendChild(label);
   li.appendChild(removeButton);
   li.appendChild(dateSpan);
+  todoList.appendChild(li);
 
   li.addEventListener('touchstart', handleTaskLongPress);
   li.addEventListener('touchend', clearTaskLongPress);
@@ -678,8 +759,6 @@ function createTodoItem(todoText, checked = false) {
     }
     saveTasks();
   });
-
-  todoList.appendChild(li);
 }
 
 function handleTaskLongPress(event) {
@@ -724,23 +803,14 @@ function updateSelectedTasks() {
 function saveTasks() {
   const tasks = Array.from(todoList.children).map(li => ({
     text: li.querySelector('label').textContent,
-    checked: li.querySelector('input[type="checkbox"]').checked,
-    sender: li.querySelector('.sender-label')?.textContent.replace('From: ', '') || null
+    checked: li.querySelector('input[type="checkbox"]').checked
   }));
   localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 function loadTasks() {
   const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  savedTasks.forEach(task => {
-    const li = createTodoItem(task.text, task.checked);
-    if (task.sender) {
-      const senderSpan = document.createElement('span');
-      senderSpan.textContent = `From: ${task.sender}`;
-      senderSpan.className = 'sender-label';
-      li.appendChild(senderSpan);
-    }
-  });
+  savedTasks.forEach(task => createTodoItem(task.text, task.checked));
 }
 
 shareSelectedTasksBtn.addEventListener('click', () => {
@@ -1034,7 +1104,7 @@ name.addEventListener('blur', finishNameEdit);
 function handleNameLongPressStart() {
   longPressTimer = setTimeout(() => {
     makeNameEditable();
-  }, 2800); // 2.8 seconds
+  }, 6000); // 6 seconds
 }
 
 function handleNameLongPressEnd() {
