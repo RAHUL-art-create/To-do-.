@@ -1,5 +1,8 @@
-<html><head><base href="https://varshit-responsive-skyscape-enhanced-v2.example.com/">
-<title>To-Do list_ Dynamic Skyscape and Rainbow</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base href="https://varshit-responsive-skyscape-enhanced-v2.example.com/">
+<title>VARSHIT with Enhanced Dynamic Skyscape and Rainbow</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -236,6 +239,7 @@
     padding: 10px;
     margin-bottom: 5px;
     transition: background-color 0.3s;
+    position: relative;
   }
   #todo-list li:hover {
     background-color: rgba(255, 255, 255, 0.9);
@@ -247,8 +251,11 @@
     margin-right: 10px;
   }
   .remove-todo {
-    margin-left: 10px;
-    padding: 2px 5px;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 5px 10px;
     background-color: #ff4d4d;
     color: white;
     border: none;
@@ -426,7 +433,7 @@
       <rect x="100" y="250" width="50" height="50" fill="#8B4513" />
       <polygon points="100,250 125,220 150,250" fill="#A52A2A" />
       <rect x="400" y="270" width="60" height="30" fill="#CD853F" />
-      <polygon points="400,270 430,240 460,270" fill="#D2691E" />
+      <polygon  points="400,270 430,240 460,270" fill="#D2691E" />
       <rect x="700" y="260" width="70" height="40" fill="#DEB887" />
       <polygon points="700,260 735,230 770,260" fill="#F4A460" />
     </g>
@@ -716,7 +723,7 @@ function addTodo() {
   }
 }
 
-function createTodoItem(todoText, checked = false) {
+function createTodoItem(todoText, checked = false, isNew = false, sender = '') {
   const li = document.createElement('li');
   const checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
@@ -734,24 +741,40 @@ function createTodoItem(todoText, checked = false) {
   li.appendChild(label);
   li.appendChild(removeButton);
   li.appendChild(dateSpan);
+
+  if (isNew) {
+    const newLabel = document.createElement('span');
+    newLabel.textContent = 'New';
+    newLabel.className = 'new-label';
+    li.appendChild(newLabel);
+    setTimeout(() => {
+      li.removeChild(newLabel);
+    }, 10000);
+  }
+
+  if (sender) {
+    const senderSpan = document.createElement('span');
+    senderSpan.textContent = `From: ${sender}`;
+    senderSpan.className = 'sender-label';
+    li.appendChild(senderSpan);
+  }
+
   todoList.appendChild(li);
 
-  li.addEventListener('touchstart', handleTaskLongPress);
-  li.addEventListener('touchend', clearTaskLongPress);
-  li.addEventListener('mousedown', handleTaskLongPress);
-  li.addEventListener('mouseup', clearTaskLongPress);
-  li.addEventListener('mouseleave', clearTaskLongPress);
+  addTaskEventListeners(li);
 
   if (checked) {
     label.style.textDecoration = 'line-through';
   }
 
-  removeButton.addEventListener('click', function() {
+  removeButton.addEventListener('click', function(event) {
+    event.stopPropagation();
     todoList.removeChild(li);
     saveTasks();
   });
 
-  checkbox.addEventListener('change', function() {
+  checkbox.addEventListener('change', function(event) {
+    event.stopPropagation();
     if (this.checked) {
       label.style.textDecoration = 'line-through';
     } else {
@@ -759,6 +782,16 @@ function createTodoItem(todoText, checked = false) {
     }
     saveTasks();
   });
+
+  return li;
+}
+
+function addTaskEventListeners(li) {
+  li.addEventListener('touchstart', handleTaskLongPress);
+  li.addEventListener('touchend', clearTaskLongPress);
+  li.addEventListener('mousedown', handleTaskLongPress);
+  li.addEventListener('mouseup', clearTaskLongPress);
+  li.addEventListener('mouseleave', clearTaskLongPress);
 }
 
 function handleTaskLongPress(event) {
@@ -770,8 +803,7 @@ function handleTaskLongPress(event) {
   }, 1000);
 }
 
-function clearTaskLongPress(event) {
-  event.preventDefault();
+function clearTaskLongPress() {
   clearTimeout(selectionTimer);
 }
 
@@ -785,7 +817,7 @@ function enableQuickSelect() {
 }
 
 function quickSelectTask(event) {
-  if (!event.target.classList.contains('remove-todo') && !event.target.classList.contains('todo-checkbox')) {
+  if (!event.target.classList.contains('remove-todo') && event.target.type !== 'checkbox') {
     toggleTaskSelection(this);
   }
 }
@@ -796,31 +828,26 @@ function toggleTaskSelection(taskElement) {
 }
 
 function updateSelectedTasks() {
-  selectedTasks = Array.from(document.querySelectorAll('.selected-task')).map(task => task.querySelector('label').textContent);
+  selectedTasks = Array.from(document.querySelectorAll('.selected-task')).map(task => ({
+    text: task.querySelector('label').textContent,
+    checked: task.querySelector('input[type="checkbox"]').checked
+  }));
   shareSelectedTasksBtn.style.display = selectedTasks.length > 0 ? 'block' : 'none';
 }
 
 function saveTasks() {
   const tasks = Array.from(todoList.children).map(li => ({
     text: li.querySelector('label').textContent,
-    checked: li.querySelector('input[type="checkbox"]').checked
+    checked: li.querySelector('input[type="checkbox"]').checked,
+    sender: li.querySelector('.sender-label') ? li.querySelector('.sender-label').textContent.replace('From: ', '') : ''
   }));
   localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 function loadTasks() {
   const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  savedTasks.forEach(task => createTodoItem(task.text, task.checked));
+  savedTasks.forEach(task => createTodoItem(task.text, task.checked, false, task.sender));
 }
-
-shareSelectedTasksBtn.addEventListener('click', () => {
-  const tasksToShare = selectedTasks.map(task => ({ text: task, checked: false }));
-  const sharedData = btoa(JSON.stringify(tasksToShare));
-  const sender = name.textContent; 
-  const shareUrl = `${window.location.origin}${window.location.pathname}?share=${sharedData}&sender=${encodeURIComponent(sender)}`;
-  multiShareLink.value = shareUrl;
-  multiShareModal.style.display = 'block';
-});
 
 function loadSharedTasks() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -831,26 +858,31 @@ function loadSharedTasks() {
     try {
       const sharedTasks = JSON.parse(atob(sharedData));
       sharedTasks.forEach(task => {
-        const li = createTodoItem(task.text, task.checked);
-        const newLabel = document.createElement('span');
-        newLabel.textContent = 'New';
-        newLabel.className = 'new-label';
-        li.appendChild(newLabel);
-        
-        const senderSpan = document.createElement('span');
-        senderSpan.textContent = `From: ${sender}`;
-        senderSpan.className = 'sender-label';
-        li.appendChild(senderSpan);
-        
-        setTimeout(() => {
-          li.removeChild(newLabel);
-        }, 10000);
+        createTodoItem(task.text, task.checked, true, sender);
       });
       saveTasks();
+      // Clear the URL parameters after loading shared tasks
+      window.history.replaceState({}, document.title, window.location.pathname);
     } catch (error) {
       console.error('Error loading shared tasks:', error);
     }
   }
+}
+
+shareSelectedTasksBtn.addEventListener('click', () => {
+  const tasksToShare = selectedTasks.map(task => ({ text: task.text, checked: task.checked }));
+  const sharedData = btoa(JSON.stringify(tasksToShare));
+  const sender = name.textContent;
+  const userId = localStorage.getItem('userId') || generateUserId();
+  const shareUrl = `${window.location.origin}${window.location.pathname}?share=${sharedData}&sender=${encodeURIComponent(sender)}&userId=${userId}`;
+  multiShareLink.value = shareUrl;
+  multiShareModal.style.display = 'block';
+});
+
+function generateUserId() {
+  const userId = Math.random().toString(36).substr(2, 9);
+  localStorage.setItem('userId', userId);
+  return userId;
 }
 
 copyMultiLinkBtn.addEventListener('click', () => {
@@ -1104,7 +1136,7 @@ name.addEventListener('blur', finishNameEdit);
 function handleNameLongPressStart() {
   longPressTimer = setTimeout(() => {
     makeNameEditable();
-  }, 2800); // 2.8 seconds
+  }, 6000); // 6 seconds
 }
 
 function handleNameLongPressEnd() {
@@ -1152,6 +1184,9 @@ window.addEventListener('load', () => {
   loadTasks();
   loadSharedTasks();
   setThemeBasedOnIndianTime();
+  if (!localStorage.getItem('userId')) {
+    generateUserId();
+  }
 });
 
 // Rainbow animation
