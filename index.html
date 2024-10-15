@@ -1,5 +1,5 @@
 <html><head><base href="https://varshit-responsive-skyscape-enhanced-v2.example.com/">
-<title>TO-Do ..</title>
+<title>VARSHIT with Enhanced Dynamic Skyscape and Rainbow</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -398,6 +398,21 @@
     pointer-events: none;
     z-index: 8;
   }
+  .new-label {
+    background-color: #4CAF50;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    margin-left: 10px;
+  }
+  .sender-label {
+    font-size: 0.7em;
+    color: #666;
+    margin-left: 10px;
+    display: block;
+    margin-top: 2px;
+  }
 </style>
 </head>
 <body>
@@ -697,6 +712,7 @@ function addTodo() {
   if (todoText) {
     createTodoItem(todoText);
     todoInput.value = '';
+    saveTasks();
   }
 }
 
@@ -732,6 +748,7 @@ function createTodoItem(todoText, checked = false) {
 
   removeButton.addEventListener('click', function() {
     todoList.removeChild(li);
+    saveTasks();
   });
 
   checkbox.addEventListener('change', function() {
@@ -740,6 +757,7 @@ function createTodoItem(todoText, checked = false) {
     } else {
       label.style.textDecoration = 'none';
     }
+    saveTasks();
   });
 }
 
@@ -767,7 +785,7 @@ function enableQuickSelect() {
 }
 
 function quickSelectTask(event) {
-  if (!event.target.classList.contains('remove-todo')) {
+  if (!event.target.classList.contains('remove-todo') && !event.target.classList.contains('todo-checkbox')) {
     toggleTaskSelection(this);
   }
 }
@@ -782,10 +800,24 @@ function updateSelectedTasks() {
   shareSelectedTasksBtn.style.display = selectedTasks.length > 0 ? 'block' : 'none';
 }
 
+function saveTasks() {
+  const tasks = Array.from(todoList.children).map(li => ({
+    text: li.querySelector('label').textContent,
+    checked: li.querySelector('input[type="checkbox"]').checked
+  }));
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function loadTasks() {
+  const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  savedTasks.forEach(task => createTodoItem(task.text, task.checked));
+}
+
 shareSelectedTasksBtn.addEventListener('click', () => {
   const tasksToShare = selectedTasks.map(task => ({ text: task, checked: false }));
   const sharedData = btoa(JSON.stringify(tasksToShare));
-  const shareUrl = `${window.location.origin}${window.location.pathname}?share=${sharedData}`;
+  const sender = name.textContent; 
+  const shareUrl = `${window.location.origin}${window.location.pathname}?share=${sharedData}&sender=${encodeURIComponent(sender)}`;
   multiShareLink.value = shareUrl;
   multiShareModal.style.display = 'block';
 });
@@ -793,11 +825,28 @@ shareSelectedTasksBtn.addEventListener('click', () => {
 function loadSharedTasks() {
   const urlParams = new URLSearchParams(window.location.search);
   const sharedData = urlParams.get('share');
+  const sender = urlParams.get('sender') || 'Unknown';
   
   if (sharedData) {
     try {
       const sharedTasks = JSON.parse(atob(sharedData));
-      sharedTasks.forEach(task => createTodoItem(task.text, task.checked));
+      sharedTasks.forEach(task => {
+        const li = createTodoItem(task.text, task.checked);
+        const newLabel = document.createElement('span');
+        newLabel.textContent = 'New';
+        newLabel.className = 'new-label';
+        li.appendChild(newLabel);
+        
+        const senderSpan = document.createElement('span');
+        senderSpan.textContent = `From: ${sender}`;
+        senderSpan.className = 'sender-label';
+        li.appendChild(senderSpan);
+        
+        setTimeout(() => {
+          li.removeChild(newLabel);
+        }, 10000);
+      });
+      saveTasks();
     } catch (error) {
       console.error('Error loading shared tasks:', error);
     }
@@ -824,7 +873,7 @@ todoInput.addEventListener('keypress', function(e) {
 function adjustNameSize() {
   const nameElement = document.getElementById('name');
   if (nameElement.textContent.length > 8) {
-    nameElement.style.fontSize = '6vw'; // Reduced size for longer names
+    nameElement.style.fontSize = '6vw'; 
   } else {
     nameElement.style.fontSize = '12vw';
   }
@@ -1055,7 +1104,7 @@ name.addEventListener('blur', finishNameEdit);
 function handleNameLongPressStart() {
   longPressTimer = setTimeout(() => {
     makeNameEditable();
-  }, 3000); // 3 seconds
+  }, 6000); // 6 seconds
 }
 
 function handleNameLongPressEnd() {
@@ -1100,6 +1149,7 @@ function loadCustomName() {
 
 window.addEventListener('load', () => {
   loadCustomName();
+  loadTasks();
   loadSharedTasks();
   setThemeBasedOnIndianTime();
 });
