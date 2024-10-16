@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <base href="https://varshit-responsive-skyscape-enhanced-v2.example.com/">
-<title>TO-DO With ANImated Background.. </title>
+<title>VARSHIT with Enhanced Dynamic Skyscape and Rainbow</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -226,14 +226,25 @@
     z-index: 100;
     max-height: calc(100vh - 40px);
     overflow-y: auto;
+    transition: transform 0.3s ease-in-out;
   }
   #todo-container h2 {
     margin-top: 0;
     color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   #todo-list {
     list-style-type: none;
     padding: 0;
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+    transition: opacity 0.3s ease-in-out;
+  }
+  #todo-list.hidden {
+    opacity: 0;
+    pointer-events: none;
   }
   #todo-list li {
     background-color: rgba(255, 255, 255, 0.7);
@@ -328,6 +339,14 @@
     border-radius: 5px;
     cursor: pointer;
   }
+  #toggle-todo-list {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    color: #333;
+  }
   @media (max-width: 600px) {
     #name {
       font-size: 18vw;
@@ -353,6 +372,9 @@
       right: 10px;
       left: 10px;
       max-width: none;
+    }
+    #todo-list {
+      max-height: calc(100vh - 300px);
     }
     .modal-content {
       width: 95%;
@@ -422,6 +444,17 @@
     width: 100%;
     margin-top: 5px;
   }
+  .name-effect {
+    position: absolute;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    animation: nameEffect  2s infinite;
+    pointer-events: none;
+  }
+  @keyframes nameEffect {
+    0% { transform: scale(1); opacity: 1; border-color: rgba(255, 255, 255, 0.5); }
+    100% { transform: scale(1.2); opacity: 0; border-color: rgba(255, 255, 255, 0); }
+  }
 </style>
 </head>
 <body>
@@ -432,9 +465,7 @@
     <path id="mountains" d="M0 300 L250 100 L500 250 L750 50 L1000 300 Z" fill="#4b6cb7" />
     <path id="vegetation" d="M0 300 Q250 250, 500 300 T1000 300" fill="#228B22" fill-opacity="0.5" />
     <g id="houses">
-      <rect x="100" y="250" 
-
- width="50" height="50" fill="#8B4513" />
+      <rect x="100" y="250" width="50" height="50" fill="#8B4513" />
       <polygon points="100,250 125,220 150,250" fill="#A52A2A" />
       <rect x="400" y="270" width="60" height="30" fill="#CD853F" />
       <polygon  points="400,270 430,240 460,270" fill="#D2691E" />
@@ -455,7 +486,10 @@
   <button id="rainToggle">Start Rain</button>
 </div>
 <div id="todo-container">
-  <h2>To-Do List</h2>
+  <h2>
+    To-Do List
+    <button id="toggle-todo-list">👁️</button>
+  </h2>
   <ul id="todo-list"></ul>
   <div id="todo-input-container">
     <input type="text" id="todo-input" placeholder="Add a new task">
@@ -479,6 +513,10 @@ let longPressTimer;
 let isEditingName = false;
 let witches = [];
 let selectionTimer;
+let isTodoListVisible = true;
+let autoUnhideTimer;
+let nameEffectInterval;
+let isIntensified = false;
 
 const background = document.getElementById('background');
 const name = document.getElementById('name');
@@ -492,6 +530,8 @@ const rainbow = document.getElementById('rainbow');
 const todoList = document.getElementById('todo-list');
 const todoInput = document.getElementById('todo-input');
 const addTodoButton = document.getElementById('add-todo');
+const todoContainer = document.getElementById('todo-container');
+const toggleTodoListBtn = document.getElementById('toggle-todo-list');
 
 let isRaining = false;
 let selectedTasks = [];
@@ -972,8 +1012,6 @@ function animateName() {
   });
 }
 
-name.addEventListener('dblclick', animateName);
-
 function updateScene(progress) {
   updateColors(progress);
 
@@ -1108,7 +1146,7 @@ function stopRain() {
 
 rainToggle.addEventListener('click', toggleRain);
 
-// Easter egg: Double-click name to make it dance
+// Easter egg: Long press name to make it editable
 name.addEventListener('touchstart', handleNameLongPressStart);
 name.addEventListener('touchend', handleNameLongPressEnd);
 name.addEventListener('mousedown', handleNameLongPressStart);
@@ -1118,11 +1156,44 @@ name.addEventListener('blur', finishNameEdit);
 function handleNameLongPressStart() {
   longPressTimer = setTimeout(() => {
     makeNameEditable();
-  }, 2800); // 2.8 seconds
+  }, 6000); // 6 seconds
+  startNameEffect();
 }
 
 function handleNameLongPressEnd() {
   clearTimeout(longPressTimer);
+  stopNameEffect();
+}
+
+function startNameEffect() {
+  const nameEffect = document.createElement('div');
+  nameEffect.className = 'name-effect';
+  name.parentNode.insertBefore(nameEffect, name.nextSibling);
+
+  function updateEffectSize() {
+    const rect = name.getBoundingClientRect();
+    nameEffect.style.width = `${rect.width + 20}px`;
+    nameEffect.style.height = `${rect.height + 20}px`;
+    nameEffect.style.left = `${rect.left - 10}px`;
+    nameEffect.style.top = `${rect.top - 10}px`;
+  }
+
+  updateEffectSize();
+  window.addEventListener('resize', updateEffectSize);
+
+  nameEffectInterval = setInterval(() => {
+    isIntensified = true;
+    nameEffect.style.animationDuration = '0.5s';
+  }, 3000);
+}
+
+function stopNameEffect() {
+  clearInterval(nameEffectInterval);
+  const nameEffect = document.querySelector('.name-effect');
+  if (nameEffect) {
+    nameEffect.remove();
+  }
+  isIntensified = false;
 }
 
 function makeNameEditable() {
@@ -1137,6 +1208,8 @@ function makeNameEditable() {
     const selection = window.getSelection();
     selection.removeAllRanges();
     selection.addRange(range);
+
+    stopNameEffect();
   }
 }
 
@@ -1209,6 +1282,45 @@ window.addEventListener('load', setThemeBasedOnIndianTime);
 
 // Initialize the scene
 updateScene(0);
+
+// Toggle Todo List visibility
+toggleTodoListBtn.addEventListener('click', () => {
+  isTodoListVisible = !isTodoListVisible;
+  todoList.classList.toggle('hidden');
+  toggleTodoListBtn.textContent = isTodoListVisible ? '👁️' : '👁️‍🗨️';
+  
+  // Animate environment when hiding/unhiding tasks
+  if (isTodoListVisible) {
+    gsap.to(container, { scale: 1, duration: 0.5, ease: "power2.out" });
+  } else {
+    gsap.to(container, { scale: 1.05, duration: 0.5, ease: "power2.out" });
+  }
+
+  // Set auto-unhide timer
+  clearTimeout(autoUnhideTimer);
+  if (!isTodoListVisible) {
+    autoUnhideTimer = setTimeout(() => {
+      isTodoListVisible = true;
+      todoList.classList.remove('hidden');
+      toggleTodoListBtn.textContent = '👁️';
+      gsap.to(container, { scale: 1, duration: 0.5, ease: "power2.out" });
+    }, 10000);
+  }
+});
+
+// Adjust todo list height for mobile
+function adjustTodoListHeight() {
+  if (window.innerWidth <= 600) {
+    const controlsRect = document.getElementById('controls').getBoundingClientRect();
+    const todoListMaxHeight = controlsRect.top - 20; // 20px buffer
+    todoList.style.maxHeight = `${todoListMaxHeight}px`;
+  } else {
+    todoList.style.maxHeight = '';
+  }
+}
+
+window.addEventListener('resize', adjustTodoListHeight);
+window.addEventListener('load', adjustTodoListHeight);
 </script>
 </body>
 </html>
