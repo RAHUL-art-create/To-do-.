@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <base href="https://varshit-responsive-skyscape-enhanced-v2.example.com/">
-<title>TO-Do_with Enhanced Dynamic Skyscape and Rainbow..</title>
+<title>VARSHIT with Enhanced Dynamic Skyscape and Rainbow</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
@@ -224,6 +224,8 @@
     padding: 20px;
     max-width: 300px;
     z-index: 100;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
   }
   #todo-container h2 {
     margin-top: 0;
@@ -240,6 +242,9 @@
     margin-bottom: 5px;
     transition: background-color 0.3s;
     position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
   }
   #todo-list li:hover {
     background-color: rgba(255, 255, 255, 0.9);
@@ -251,21 +256,19 @@
     margin-right: 10px;
   }
   .remove-todo {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
     padding: 5px 10px;
     background-color: #ff4d4d;
     color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
+    margin-left: auto;
   }
   .todo-date {
-    margin-left: 10px;
     font-size: 0.8em;
     color: #666;
+    width: 100%;
+    margin-top: 5px;
   }
   #todo-input-container {
     display: flex;
@@ -416,9 +419,8 @@
   .sender-label {
     font-size: 0.7em;
     color: #666;
-    margin-left: 10px;
-    display: block;
-    margin-top: 2px;
+    width: 100%;
+    margin-top: 5px;
   }
 </style>
 </head>
@@ -430,7 +432,9 @@
     <path id="mountains" d="M0 300 L250 100 L500 250 L750 50 L1000 300 Z" fill="#4b6cb7" />
     <path id="vegetation" d="M0 300 Q250 250, 500 300 T1000 300" fill="#228B22" fill-opacity="0.5" />
     <g id="houses">
-      <rect x="100" y="250" width="50" height="50" fill="#8B4513" />
+      <rect x="100" y="250" 
+
+ width="50" height="50" fill="#8B4513" />
       <polygon points="100,250 125,220 150,250" fill="#A52A2A" />
       <rect x="400" y="270" width="60" height="30" fill="#CD853F" />
       <polygon  points="400,270 430,240 460,270" fill="#D2691E" />
@@ -787,38 +791,16 @@ function createTodoItem(todoText, checked = false, isNew = false, sender = '') {
 }
 
 function addTaskEventListeners(li) {
-  li.addEventListener('touchstart', handleTaskLongPress);
-  li.addEventListener('touchend', clearTaskLongPress);
-  li.addEventListener('mousedown', handleTaskLongPress);
-  li.addEventListener('mouseup', clearTaskLongPress);
-  li.addEventListener('mouseleave', clearTaskLongPress);
+  li.addEventListener('click', handleTaskClick);
 }
 
-function handleTaskLongPress(event) {
-  event.preventDefault();
+function handleTaskClick(event) {
   const li = event.currentTarget;
-  selectionTimer = setTimeout(() => {
+  const checkbox = li.querySelector('input[type="checkbox"]');
+  const removeButton = li.querySelector('.remove-todo');
+
+  if (event.target !== checkbox && event.target !== removeButton) {
     toggleTaskSelection(li);
-    enableQuickSelect();
-  }, 1000);
-}
-
-function clearTaskLongPress() {
-  clearTimeout(selectionTimer);
-}
-
-function enableQuickSelect() {
-  const tasks = document.querySelectorAll('#todo-list li');
-  tasks.forEach(task => {
-    task.removeEventListener('touchstart', handleTaskLongPress);
-    task.removeEventListener('mousedown', handleTaskLongPress);
-    task.addEventListener('click', quickSelectTask);
-  });
-}
-
-function quickSelectTask(event) {
-  if (!event.target.classList.contains('remove-todo') && event.target.type !== 'checkbox') {
-    toggleTaskSelection(this);
   }
 }
 
@@ -1136,7 +1118,7 @@ name.addEventListener('blur', finishNameEdit);
 function handleNameLongPressStart() {
   longPressTimer = setTimeout(() => {
     makeNameEditable();
-  }, 2800); // 2.8 seconds
+  }, 6000); // 6 seconds
 }
 
 function handleNameLongPressEnd() {
