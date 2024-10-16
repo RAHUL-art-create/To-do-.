@@ -4,9 +4,6 @@
 
 A demo of the app is available [here](https://rahul-art-create.github.io/To-do-./).
 
-#### Overview:
-THIS is an interactive and responsive dynamic skyscape web experience featuring celestial transitions, cloud animations, rainbow effects, and task management tools. The web app is designed with an intuitive interface that allows users to control environmental factors such as time of day, rain effects, and rainbow visibility.
-
 ---
 ### Main Features:
 
