@@ -189,7 +189,7 @@
     background: radial-gradient(
       circle at 50% 100%,
       rgba(255, 0, 0, 0) 50%,
-      rgba(255, 0, 0, 0.7) 51%,
+      rgba(255, 0, 0.7) 51%,
       rgba(255, 165, 0, 0.7) 53%,
       rgba(255, 255, 0, 0.7) 55%,
       rgba(0, 128, 0, 0.7) 57%,
@@ -371,10 +371,17 @@
   #toggle-todo-list {
     background: none;
     border: none;
-    font-size: 1.5rem;
     cursor: pointer;
     padding: 0;
-    color: #333;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+  }
+  #toggle-todo-list:hover {
+    transform: scale(1.1);
   }
   @media (max-width: 600px) {
     #name {
@@ -862,6 +869,67 @@
     #controls {
       padding-bottom: 50px; /* Add space for info icon */
     }
+  }
+
+  .name-effect {
+    border: 2px solid transparent;
+    border-radius: 10px;
+    animation: nameEffect 2s infinite;
+    pointer-events: none;
+  }
+
+  @keyframes nameEffect {
+    0% { 
+      transform: scale(1); 
+      opacity: 1; 
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    100% { 
+      transform: scale(1.2); 
+      opacity: 0; 
+      border-color: rgba(255, 255, 255, 0);
+    }
+  }
+
+  /* Add these custom eye icon styles */
+  .eye-icon {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .eye-icon::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--theme-color);
+    border-radius: 75% 15%;
+    transform: rotate(45deg);
+    transition: all 0.3s ease;
+  }
+
+  .eye-icon::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: var(--theme-color);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+  }
+
+  .eye-icon.closed::before {
+    height: 2px;
+    border-radius: 0;
+    transform: rotate(-45deg);
+  }
+
+  .eye-icon.closed::after {
+    transform: scale(0);
   }
 </style>
 </head>
@@ -1705,12 +1773,43 @@ function handleNameLongPressEnd() {
 function startNameEffect() {
   const nameEffect = document.createElement('div');
   nameEffect.className = 'name-effect';
-  nameEffect.style.position = 'absolute';
-  nameEffect.style.width = `${name.offsetWidth + 20}px`;
-  nameEffect.style.height = `${name.offsetHeight + 20}px`;
-  nameEffect.style.left = `${name.offsetLeft - 10}px`;
-  nameEffect.style.top = `${name.offsetTop - 10}px`;
-  name.parentNode.insertBefore(nameEffect, name.nextSibling);
+  
+  // Get name element's position and dimensions
+  const nameRect = name.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  
+  // Calculate relative position to container
+  const relativeTop = nameRect.top - containerRect.top;
+  const relativeLeft = nameRect.left - containerRect.left;
+  
+  // Position the effect centered around the name
+  nameEffect.style.cssText = `
+    position: absolute;
+    width: ${nameRect.width + 40}px;
+    height: ${nameRect.height + 40}px;
+    left: ${relativeLeft - 20}px;
+    top: ${relativeTop - 20}px;
+    pointer-events: none;
+    z-index: 9;
+  `;
+  
+  // Insert before the name to ensure it appears behind
+  name.parentNode.insertBefore(nameEffect, name);
+
+  // Update position on window resize
+  const updatePosition = () => {
+    const newNameRect = name.getBoundingClientRect();
+    const newContainerRect = container.getBoundingClientRect();
+    const newRelativeTop = newNameRect.top - newContainerRect.top;
+    const newRelativeLeft = newNameRect.left - newContainerRect.left;
+    
+    nameEffect.style.width = `${newNameRect.width + 40}px`;
+    nameEffect.style.height = `${newNameRect.height + 40}px`;
+    nameEffect.style.left = `${newRelativeLeft - 20}px`;
+    nameEffect.style.top = `${newRelativeTop - 20}px`;
+  };
+
+  window.addEventListener('resize', updatePosition);
 
   nameEffectInterval = setInterval(() => {
     isIntensified = true;
@@ -1818,23 +1917,29 @@ window.addEventListener('load', setThemeBasedOnIndianTime);
 // Initialize the scene
 updateScene(0);
 
-// Toggle Todo List visibility
+// Update the toggle button HTML creation
+function updateToggleButton(isVisible) {
+  const toggleBtn = document.getElementById('toggle-todo-list');
+  toggleBtn.innerHTML = '<div class="eye-icon' + (!isVisible ? ' closed' : '') + '"></div>';
+}
+
+// Update the toggle event listener
 toggleTodoListBtn.addEventListener('click', () => {
   isTodoListVisible = !isTodoListVisible;
   
   if (isTodoListVisible) {
     todoList.classList.remove('hidden');
-    if (window.innerWidth > 600) { // Only animate scale on desktop
+    if (window.innerWidth > 600) {
       gsap.to(container, { scale: 1, duration: 0.5, ease: "power2.out" });
     }
     todoList.classList.add('task-reappear');
     updateTodoListScrollability();
-    toggleTodoListBtn.textContent = '👁️';
+    updateToggleButton(true);
     todoContainer.style.height = '';
     todoContainer.style.minHeight = '';
   } else {
     todoList.classList.add('hidden');
-    if (window.innerWidth > 600) { // Only animate scale on desktop
+    if (window.innerWidth > 600) {
       gsap.to(container, { scale: 1.05, duration: 0.5, ease: "power2.out" });
     }
     const headerHeight = document.querySelector('#todo-container h2').offsetHeight;
@@ -1843,7 +1948,7 @@ toggleTodoListBtn.addEventListener('click', () => {
     todoContainer.style.height = `${totalHeight}px`;
     todoContainer.style.minHeight = `${totalHeight}px`;
     todoList.classList.remove('task-reappear');
-    toggleTodoListBtn.textContent = '👁️‍🗨️';
+    updateToggleButton(false);
   }
 
   clearTimeout(autoUnhideTimer);
@@ -1860,6 +1965,12 @@ toggleTodoListBtn.addEventListener('click', () => {
       showNotification('Tasks are visible again!');
     }, 10000);
   }
+});
+
+// Initialize the toggle button on load
+window.addEventListener('load', () => {
+  // Existing load handlers...
+  updateToggleButton(true);
 });
 
 // Adjust todo list height for mobile
@@ -2146,6 +2257,31 @@ function updateScene(progress) {
     });
   }
 }
+
+// Update the nameEffect animation in CSS
+const nameEffectStyle = document.createElement('style');
+nameEffectStyle.textContent = `
+  .name-effect {
+    border: 2px solid transparent;
+    border-radius: 10px;
+    animation: nameEffect 2s infinite;
+    pointer-events: none;
+  }
+
+  @keyframes nameEffect {
+    0% { 
+      transform: scale(1); 
+      opacity: 1; 
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+    100% { 
+      transform: scale(1.2); 
+      opacity: 0; 
+      border-color: rgba(255, 255, 255, 0);
+    }
+  }
+`;
+document.head.appendChild(nameEffectStyle);
 </script>
 </body>
 </html>
