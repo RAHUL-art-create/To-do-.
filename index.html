@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<base href="https://varshit-responsive-skyscape-enhanced-v2.example.com/">
+<base href="https://rahul-responsive-skyscape-enhanced-v2.example.com/">
 <title>TO-DO^ Mark_Down 🌦️</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
   body, html {
@@ -173,8 +173,10 @@
   }
   @media (max-width: 600px) {
     #rainbow {
-      height: 30vh;
-      top: 35vh;
+      width: 200%;
+      height: 100vh;
+      top: 40vh;
+      transform: translate(-50%, -50%);
     }
   }
   #rainbow::before {
@@ -224,9 +226,15 @@
     padding: 20px;
     max-width: 300px;
     z-index: 100;
+    transition: all 0.3s ease-in-out, background-color 2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Add gap between elements */
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    min-height: 120px;
     max-height: calc(100vh - 40px);
-    overflow-y: auto;
-    transition: transform 0.3s ease-in-out;
   }
   #todo-container h2 {
     margin-top: 0;
@@ -234,28 +242,41 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(76, 175, 80, 0.3);
+    margin-bottom: 15px;
   }
   #todo-list {
     list-style-type: none;
     padding: 0;
-    max-height: calc(100vh - 250px);
+    margin: 0;
+    transition: all 0.3s ease-in-out;
     overflow-y: auto;
-    transition: opacity 0.3s ease-in-out;
+    scrollbar-width: thin;
+    scrollbar-color: #4CAF50 rgba(255, 255, 255, 0.3);
+    min-height: 0;
+    flex: 1;
   }
   #todo-list.hidden {
     opacity: 0;
+    max-height: 0;
+    margin: 0;
+    padding: 0;
     pointer-events: none;
+    min-height: 0;
   }
   #todo-list li {
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 5px;
-    transition: background-color 0.3s;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-left: 4px solid var(--theme-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 8px;
+    border-radius: 0 5px 5px 0;
+    transition: opacity 0.3s ease;
     position: relative;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
+    padding: 10px;
   }
   #todo-list li:hover {
     background-color: rgba(255, 255, 255, 0.9);
@@ -268,12 +289,13 @@
   }
   .remove-todo {
     padding: 5px 10px;
-    background-color: #ff4d4d;
+    background-color: var(--theme-color-dark);
     color: white;
     border: none;
     border-radius: 3px;
     cursor: pointer;
     margin-left: auto;
+    opacity: 0.9;
   }
   .todo-date {
     font-size: 0.8em;
@@ -293,7 +315,7 @@
   }
   #add-todo {
     padding: 5px 10px;
-    background-color: #4CAF50;
+    background-color: var(--theme-color);
     color: white;
     border: none;
     border-radius: 0 5px 5px 0;
@@ -331,13 +353,20 @@
     background-color: #e0f7fa !important;
   }
   #share-selected-tasks {
-    margin-top: 10px;
-    padding: 5px 10px;
-    background-color: #4CAF50;
+    margin: 10px 0;
+    padding: 8px 15px;
+    background-color: var(--theme-color);
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 101;
+    height: 0;
+    opacity: 0;
+    display: none;
+    overflow: hidden;
   }
   #toggle-todo-list {
     background: none;
@@ -372,13 +401,34 @@
       right: 10px;
       left: 10px;
       max-width: none;
+      padding: 15px;
+      max-height: auto;
     }
     #todo-list {
-      max-height: calc(100vh - 300px);
+      max-height: calc(6 * 45px); /* Height for 6 tasks */
+      overflow-y: hidden; /* Hide scrollbar by default */
+    }
+    #todo-list.scrollable {
+      overflow-y: auto; /* Show scrollbar when needed */
     }
     .modal-content {
       width: 95%;
       margin: 10% auto;
+    }
+    #info-icon {
+      top: auto;
+      bottom: 80px; /* Position above the slider controls */
+      left: 10px;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+    }
+    #info-panel {
+      top: auto;
+      bottom: 110px; /* Position above the info icon */
+      left: 10px;
+      padding: 8px;
+      max-width: 160px;
     }
   }
   #name[contenteditable="true"] {
@@ -455,9 +505,385 @@
     0% { transform: scale(1); opacity: 1; border-color: rgba(255, 255, 255, 0.5); }
     100% { transform: scale(1.2); opacity: 0; border-color: rgba(255, 255, 255, 0); }
   }
+  /* Custom scrollbar styles */
+  #todo-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #todo-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+  }
+
+  #todo-list::-webkit-scrollbar-thumb {
+    background-color: #4CAF50;
+    border-radius: 3px;
+  }
+
+  #todo-input {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+
+  #todo-input:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  }
+
+  #add-todo {
+    background: var(--theme-color);
+    padding: 8px 15px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+  }
+
+  #add-todo:hover {
+    background: #45a049;
+  }
+
+  /* Info Icon Styles */
+  #info-icon {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    z-index: 2000;
+    font-size: 14px;
+    font-style: italic;
+    font-weight: bold;
+    color: var(--theme-color, #4CAF50);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+  }
+
+  #info-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  #info-panel {
+    position: fixed;
+    top: 50px;
+    left: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    max-width: 180px;
+    z-index: 1999;
+    transform: translateY(-10px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .info-item {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #444;
+    font-size: 0.75rem;
+  }
+
+  .info-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .info-icon {
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 600px) {
+    #info-icon {
+      top: auto;
+      bottom: 80px; /* Position above the slider controls */
+      left: 10px;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+    }
+
+    #info-panel {
+      top: auto;
+      bottom: 110px; /* Position above the info icon */
+      left: 10px;
+      padding: 8px;
+      max-width: 160px;
+    }
+
+    .info-item {
+      margin-bottom: 6px;
+      padding-bottom: 6px;
+    }
+  }
+
+  /* Add animation for panel visibility */
+  .info-panel-visible {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Task reappear animation */
+  @keyframes taskReappear {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .task-reappear {
+    animation: taskReappear 0.5s ease forwards;
+    display: block !important;
+  }
+
+  @media (max-width: 600px) {
+    #todo-container {
+      margin: 10px;
+      max-height: calc(100vh - 180px);
+    }
+
+    #info-panel {
+      left: 0;
+      right: 0;
+      margin: 0 10px;
+      max-width: none;
+    }
+  }
+
+  .info-panel-visible {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Update the task item styles */
+  #todo-list li {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-left: 4px solid var(--theme-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 8px;
+    border-radius: 0 5px 5px 0;
+    transition: opacity 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+
+  .todo-item-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .todo-item-left {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  .todo-item-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .todo-meta {
+    margin-top: 5px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  .todo-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .todo-date::before {
+    content: '📅';
+  }
+
+  .new-label {
+    background-color: #4CAF50;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+  }
+
+  .sender-label {
+    color: #2196F3;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .sender-label::before {
+    content: '👤';
+  }
+
+  /* Update info icon styles */
+  #info-icon {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    font-size: 1.2rem;
+    backdrop-filter: blur(5px);
+  }
+
+  #info-panel {
+    position: fixed;
+    top: 60px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    max-width: 200px;
+    z-index: 999;
+    transform: translateY(-10px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 600px) {
+    #info-icon {
+      top: 20px;
+      left: 20px;
+      width: 35px;
+      height: 35px;
+    }
+
+    #info-panel {
+      top: 65px;
+      left: 10px;
+      right: 10px;
+      max-width: none;
+      margin: 0 10px;
+    }
+
+    #container {
+      transform: scale(1) !important;
+    }
+
+    body {
+      touch-action: manipulation;
+      -webkit-text-size-adjust: 100%;
+    }
+  }
+
+  #todo-container {
+    transition: height 0.3s ease-in-out, min-height 0.3s ease-in-out;
+  }
+  
+  #todo-list.hidden {
+    height: 0;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+  }
+
+  /* Update info icon styles for mobile */
+  @media (max-width: 600px) {
+    #info-icon {
+      top: auto;
+      bottom: 15px; /* Position at bottom */
+      left: 15px;
+      width: 28px;
+      height: 28px;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.95);
+      z-index: 2000;
+    }
+
+    #info-panel {
+      top: auto;
+      bottom: 55px; /* Position above the info icon */
+      left: 15px;
+      padding: 10px;
+      max-width: 200px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    /* Ensure info panel appears above the icon */
+    .info-panel-visible {
+      transform: translateY(0) !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    /* Adjust controls to prevent overlap */
+    #controls {
+      padding-bottom: 50px; /* Add space for info icon */
+    }
+  }
 </style>
 </head>
 <body>
+<div id="info-icon">i</div>
+<div id="info-panel">
+  <div class="info-item">
+    <span class="info-icon">⏱️</span> Long press on name (6s) to edit
+  </div>
+  <div class="info-item">
+    <span class="info-icon">✨</span> Click on tasks empty space to select multiple
+  </div>
+  <div class="info-item">
+    <span class="info-icon">🔗</span> Share selected tasks by copying link
+  </div>
+  <div class="info-item">
+    <span class="info-icon">🔄</span> Tasks auto-unhide after 10s
+  </div>
+  <div class="info-item">
+    <span class="info-icon">🌤️</span> Theme changes with Indian time
+  </div>
+</div>
 <div id="container">
   <div id="background"></div>
   <div id="rainbow"></div>
@@ -476,7 +902,7 @@
     <path id="stream2" d="M500 250 Q550 275, 600 300" fill="none" stroke="#4FC3F7" stroke-width="5" />
     <path id="stream3" d="M750 50 Q800 175, 850 300" fill="none" stroke="#4FC3F7" stroke-width="5" />
   </svg>
-  <h1 id="name">VARSHIT</h1>
+  <h1 id="name">RAHUL</h1>
   <div id="sun" class="celestial-body"></div>
   <div id="moon" class="celestial-body"></div>
 </div>
@@ -575,10 +1001,14 @@ function updateColors(progress) {
     skyColor = colors.sunrise.sky;
     celestialBody = colors.sunrise.sun;
     timeLabel.textContent = "Sunrise";
-  } else if (progress < 50) {
+  } else if (progress < 37.5) {
     skyColor = colors.day.sky;
     celestialBody = colors.day.sun;
     timeLabel.textContent = "Day";
+  } else if (progress < 50) {
+    skyColor = 'linear-gradient(to bottom, #FFB74D, #FFE0B2)';
+    celestialBody = 'radial-gradient(circle, #FFD700 0%, #FFA500 100%)';
+    timeLabel.textContent = "Afternoon";
   } else if (progress < 75) {
     skyColor = colors.sunset.sky;
     celestialBody = colors.sunset.sun;
@@ -588,6 +1018,7 @@ function updateColors(progress) {
     celestialBody = colors.night.moon;
     timeLabel.textContent = "Night";
   }
+  
   background.style.background = skyColor;
 
   if (progress < 75) {
@@ -769,30 +1200,56 @@ function addTodo() {
 
 function createTodoItem(todoText, checked = false, isNew = false, sender = '') {
   const li = document.createElement('li');
+  
+  // Create main content container
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'todo-item-content';
+  
+  // Create left side container
+  const leftDiv = document.createElement('div');
+  leftDiv.className = 'todo-item-left';
+  
   const checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
   checkbox.checked = checked;
+  
   const label = document.createElement('label');
   label.textContent = todoText;
+  
+  leftDiv.appendChild(checkbox);
+  leftDiv.appendChild(label);
+  
+  // Create right side container
+  const rightDiv = document.createElement('div');
+  rightDiv.className = 'todo-item-right';
+  
   const removeButton = document.createElement('button');
   removeButton.textContent = 'Remove';
   removeButton.className = 'remove-todo';
+  
+  rightDiv.appendChild(removeButton);
+  
+  // Add main content to li
+  contentDiv.appendChild(leftDiv);
+  contentDiv.appendChild(rightDiv);
+  li.appendChild(contentDiv);
+  
+  // Create meta information container
+  const metaDiv = document.createElement('div');
+  metaDiv.className = 'todo-meta';
+  
   const dateSpan = document.createElement('span');
   dateSpan.className = 'todo-date';
   dateSpan.textContent = new Date().toLocaleDateString('en-IN');
-  
-  li.appendChild(checkbox);
-  li.appendChild(label);
-  li.appendChild(removeButton);
-  li.appendChild(dateSpan);
+  metaDiv.appendChild(dateSpan);
 
   if (isNew) {
     const newLabel = document.createElement('span');
     newLabel.textContent = 'New';
     newLabel.className = 'new-label';
-    li.appendChild(newLabel);
+    metaDiv.appendChild(newLabel);
     setTimeout(() => {
-      li.removeChild(newLabel);
+      metaDiv.removeChild(newLabel);
     }, 10000);
   }
 
@@ -800,10 +1257,22 @@ function createTodoItem(todoText, checked = false, isNew = false, sender = '') {
     const senderSpan = document.createElement('span');
     senderSpan.textContent = `From: ${sender}`;
     senderSpan.className = 'sender-label';
-    li.appendChild(senderSpan);
+    metaDiv.appendChild(senderSpan);
   }
 
-  todoList.appendChild(li);
+  li.appendChild(metaDiv);
+  
+  todoList.insertBefore(li, todoList.firstChild);
+  
+  // Scroll to the new task
+  li.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  
+  updateTodoListScrollability();
+  
+  // Highlight new task
+  if (isNew) {
+    li.style.animation = 'highlightNew 2s ease';
+  }
 
   addTaskEventListeners(li);
 
@@ -814,6 +1283,7 @@ function createTodoItem(todoText, checked = false, isNew = false, sender = '') {
   removeButton.addEventListener('click', function(event) {
     event.stopPropagation();
     todoList.removeChild(li);
+    updateTodoListScrollability();
     saveTasks();
   });
 
@@ -854,7 +1324,30 @@ function updateSelectedTasks() {
     text: task.querySelector('label').textContent,
     checked: task.querySelector('input[type="checkbox"]').checked
   }));
-  shareSelectedTasksBtn.style.display = selectedTasks.length > 0 ? 'block' : 'none';
+  
+  const shareBtn = document.getElementById('share-selected-tasks');
+  
+  if (selectedTasks.length > 0) {
+    shareBtn.style.display = 'block';
+    gsap.to(shareBtn, {
+      opacity: 1,
+      height: 'auto',
+      marginTop: '10px',
+      duration: 0.3,
+      ease: "power2.out"
+    });
+  } else {
+    gsap.to(shareBtn, {
+      opacity: 0,
+      height: 0,
+      marginTop: 0,
+      duration: 0.3,
+      ease: "power2.out",
+      onComplete: () => {
+        shareBtn.style.display = 'none';
+      }
+    });
+  }
 }
 
 function saveTasks() {
@@ -868,7 +1361,9 @@ function saveTasks() {
 
 function loadTasks() {
   const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  savedTasks.forEach(task => createTodoItem(task.text, task.checked, false, task.sender));
+  // Load tasks in reverse order
+  savedTasks.reverse().forEach(task => createTodoItem(task.text, task.checked, false, task.sender));
+  updateTodoListScrollability();
 }
 
 function loadSharedTasks() {
@@ -879,16 +1374,57 @@ function loadSharedTasks() {
   if (sharedData) {
     try {
       const sharedTasks = JSON.parse(atob(sharedData));
-      sharedTasks.forEach(task => {
-        createTodoItem(task.text, task.checked, true, sender);
-      });
-      saveTasks();
+      
+      // Show confirmation modal for shared tasks
+      showSharedTasksConfirmation(sharedTasks, sender);
+      
       // Clear the URL parameters after loading shared tasks
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (error) {
       console.error('Error loading shared tasks:', error);
+      showNotification('Error loading shared tasks');
     }
   }
+}
+
+// Add confirmation modal for shared tasks
+function showSharedTasksConfirmation(tasks, sender) {
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.style.display = 'block';
+  
+  const content = document.createElement('div');
+  content.className = 'modal-content';
+  content.innerHTML = `
+    <h3>Shared Tasks from ${sender}</h3>
+    <p>Would you like to add these tasks?</p>
+    <div style="max-height: 200px; overflow-y: auto; margin: 10px 0;">
+      ${tasks.map(task => `
+        <div style="padding: 5px; background: rgba(255,255,255,0.9); margin: 5px 0; border-radius: 3px;">
+          ${task.text} ${task.checked ? '(Completed)' : ''}
+        </div>
+      `).join('')}
+    </div>
+    <button id="accept-shared">Accept All</button>
+    <button id="decline-shared">Decline</button>
+  `;
+  
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+  
+  document.getElementById('accept-shared').addEventListener('click', () => {
+    tasks.forEach(task => {
+      createTodoItem(task.text, task.checked, true, sender);
+    });
+    saveTasks();
+    document.body.removeChild(modal);
+    showNotification(`Added ${tasks.length} tasks from ${sender}`);
+  });
+  
+  document.getElementById('decline-shared').addEventListener('click', () => {
+    document.body.removeChild(modal);
+    showNotification('Declined shared tasks');
+  });
 }
 
 shareSelectedTasksBtn.addEventListener('click', () => {
@@ -1014,6 +1550,7 @@ function animateName() {
 
 function updateScene(progress) {
   updateColors(progress);
+  updateThemeColors(progress);
 
   const mountainColor = progress < 25 ? '#FF9966' :
                         progress < 50 ? '#4b6cb7' :
@@ -1168,18 +1705,12 @@ function handleNameLongPressEnd() {
 function startNameEffect() {
   const nameEffect = document.createElement('div');
   nameEffect.className = 'name-effect';
+  nameEffect.style.position = 'absolute';
+  nameEffect.style.width = `${name.offsetWidth + 20}px`;
+  nameEffect.style.height = `${name.offsetHeight + 20}px`;
+  nameEffect.style.left = `${name.offsetLeft - 10}px`;
+  nameEffect.style.top = `${name.offsetTop - 10}px`;
   name.parentNode.insertBefore(nameEffect, name.nextSibling);
-
-  function updateEffectSize() {
-    const rect = name.getBoundingClientRect();
-    nameEffect.style.width = `${rect.width + 20}px`;
-    nameEffect.style.height = `${rect.height + 20}px`;
-    nameEffect.style.left = `${rect.left - 10}px`;
-    nameEffect.style.top = `${rect.top - 10}px`;
-  }
-
-  updateEffectSize();
-  window.addEventListener('resize', updateEffectSize);
 
   nameEffectInterval = setInterval(() => {
     isIntensified = true;
@@ -1230,6 +1761,8 @@ function loadCustomName() {
   const customName = localStorage.getItem('customName');
   if (customName) {
     name.textContent = customName;
+  } else {
+    name.textContent = 'RAHUL'; // Set default name if no custom name is saved
   }
   adjustNameSize();
 }
@@ -1265,8 +1798,10 @@ function setThemeBasedOnIndianTime() {
   let progress;
   if (indianHour >= 5 && indianHour < 8) {
     progress = 0; // Sunrise
-  } else if (indianHour >= 8 && indianHour < 16) {
+  } else if (indianHour >= 8 && indianHour < 12) {
     progress = 25; // Day
+  } else if (indianHour >= 12 && indianHour < 16) {
+    progress = 37.5; // Afternoon
   } else if ((indianHour === 16 && indianMinute >= 0) || (indianHour > 16 && indianHour < 18) || (indianHour === 18 && indianMinute <= 30)) {
     progress = 50; // Sunset (4:00 PM to 6:30 PM)
   } else {
@@ -1286,24 +1821,43 @@ updateScene(0);
 // Toggle Todo List visibility
 toggleTodoListBtn.addEventListener('click', () => {
   isTodoListVisible = !isTodoListVisible;
-  todoList.classList.toggle('hidden');
-  toggleTodoListBtn.textContent = isTodoListVisible ? '👁️' : '👁️‍🗨️';
   
-  // Animate environment when hiding/unhiding tasks
   if (isTodoListVisible) {
-    gsap.to(container, { scale: 1, duration: 0.5, ease: "power2.out" });
+    todoList.classList.remove('hidden');
+    if (window.innerWidth > 600) { // Only animate scale on desktop
+      gsap.to(container, { scale: 1, duration: 0.5, ease: "power2.out" });
+    }
+    todoList.classList.add('task-reappear');
+    updateTodoListScrollability();
+    toggleTodoListBtn.textContent = '👁️';
+    todoContainer.style.height = '';
+    todoContainer.style.minHeight = '';
   } else {
-    gsap.to(container, { scale: 1.05, duration: 0.5, ease: "power2.out" });
+    todoList.classList.add('hidden');
+    if (window.innerWidth > 600) { // Only animate scale on desktop
+      gsap.to(container, { scale: 1.05, duration: 0.5, ease: "power2.out" });
+    }
+    const headerHeight = document.querySelector('#todo-container h2').offsetHeight;
+    const inputHeight = document.querySelector('#todo-input-container').offsetHeight;
+    const totalHeight = headerHeight + inputHeight + 40;
+    todoContainer.style.height = `${totalHeight}px`;
+    todoContainer.style.minHeight = `${totalHeight}px`;
+    todoList.classList.remove('task-reappear');
+    toggleTodoListBtn.textContent = '👁️‍🗨️';
   }
 
-  // Set auto-unhide timer
   clearTimeout(autoUnhideTimer);
   if (!isTodoListVisible) {
     autoUnhideTimer = setTimeout(() => {
       isTodoListVisible = true;
       todoList.classList.remove('hidden');
+      todoList.classList.add('task-reappear');
       toggleTodoListBtn.textContent = '👁️';
       gsap.to(container, { scale: 1, duration: 0.5, ease: "power2.out" });
+      todoContainer.style.height = '';
+      todoContainer.style.minHeight = '';
+      updateTodoListScrollability();
+      showNotification('Tasks are visible again!');
     }, 10000);
   }
 });
@@ -1321,6 +1875,277 @@ function adjustTodoListHeight() {
 
 window.addEventListener('resize', adjustTodoListHeight);
 window.addEventListener('load', adjustTodoListHeight);
+
+// Add this function to check and update scrollability
+function updateTodoListScrollability() {
+  const isMobile = window.innerWidth <= 600;
+  const todoList = document.getElementById('todo-list');
+  const tasks = todoList.children;
+  
+  if (isMobile) {
+    const hasScrollbar = tasks.length > 4; // Change to 4 tasks
+    todoList.classList.toggle('scrollable', hasScrollbar);
+    
+    // Update container height based on number of tasks
+    const containerHeight = Math.min(tasks.length, 4) * 80 + 160; // 160px for header, input and share button
+    todoContainer.style.height = hasScrollbar ? `${containerHeight}px` : 'auto';
+    
+    // Force scrollbar visibility after 4 tasks
+    if (hasScrollbar) {
+      todoList.style.overflowY = 'scroll';
+    }
+  } else {
+    // Desktop view
+    const controlsRect = document.getElementById('controls').getBoundingClientRect();
+    const maxHeight = controlsRect.top - todoContainer.offsetTop - 40;
+    todoList.style.maxHeight = `${maxHeight}px`;
+    todoContainer.style.maxHeight = `${maxHeight + 160}px`; // Add space for header, input and share button
+  }
+}
+
+// Add notification function
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    animation: slideUp 0.3s ease forwards;
+  `;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+
+  setTimeout(() => {
+    notification.style.animation = 'slideDown 0.3s ease forwards';
+    setTimeout(() => {
+      document.body.removeChild(notification);
+    }, 300);
+  }, 3000);
+}
+
+// Add these animations to your CSS
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideUp {
+    from { transform: translate(-50%, 100%); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+  }
+  @keyframes slideDown {
+    from { transform: translate(-50%, 0); opacity: 1; }
+    to { transform: translate(-50%, 100%); opacity: 0; }
+  }
+`;
+document.head.appendChild(style);
+
+// Update info icon to use click instead of hover
+document.addEventListener('DOMContentLoaded', () => {
+  const infoIcon = document.getElementById('info-icon');
+  const infoPanel = document.getElementById('info-panel');
+  let isPanelVisible = false;
+  
+  infoIcon.addEventListener('click', (e) => {
+    e.stopPropagation();
+    isPanelVisible = !isPanelVisible;
+    infoPanel.classList.toggle('info-panel-visible');
+    
+    // Animate icon
+    if (isPanelVisible) {
+      gsap.to(infoIcon, {
+        rotate: 360,
+        duration: 0.5,
+        ease: "power2.out"
+      });
+    } else {
+      gsap.to(infoIcon, {
+        rotate: 0,
+        duration: 0.5,
+        ease: "power2.out"
+      });
+    }
+  });
+  
+  // Close panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (isPanelVisible && !infoPanel.contains(e.target)) {
+      isPanelVisible = false;
+      infoPanel.classList.remove('info-panel-visible');
+      gsap.to(infoIcon, {
+        rotate: 0,
+        duration: 0.5,
+        ease: "power2.out"
+      });
+    }
+  });
+
+  // Update info icon color with theme
+  function updateInfoIconColor(progress) {
+    const themeColor = getThemeColor(progress);
+    infoIcon.style.color = themeColor;
+  }
+
+  // Add observer to update info icon color when theme changes
+  const observer = new MutationObserver(() => {
+    const themeColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--theme-color');
+    infoIcon.style.color = themeColor;
+  });
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['style']
+  });
+});
+
+// Add styles for shared tasks modal buttons
+const sharedTasksStyle = document.createElement('style');
+sharedTasksStyle.textContent = `
+  #accept-shared, #decline-shared {
+    padding: 8px 15px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  #accept-shared {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  #decline-shared {
+    background-color: #ff4d4d;
+    color: white;
+  }
+`;
+document.head.appendChild(sharedTasksStyle);
+
+// Add this to your window load event
+window.addEventListener('load', () => {
+  // Existing load handlers...
+  
+  // Force initial scale for mobile
+  if (window.innerWidth <= 600) {
+    gsap.set(container, { scale: 1 });
+    document.body.style.zoom = 1;
+  }
+});
+
+// Add highlight animation
+const highlightStyle = document.createElement('style');
+highlightStyle.textContent = `
+  @keyframes highlightNew {
+    0% { background-color: rgba(76, 175, 80, 0.2); }
+    100% { background-color: rgba(255, 255, 255, 0.8); }
+  }
+`;
+document.head.appendChild(highlightStyle);
+
+// Add this function to update theme colors
+function updateThemeColors(progress) {
+  let themeColor, themeColorDark;
+  
+  if (progress < 25) {
+    // Sunrise
+    themeColor = '#ff7e5f';
+    themeColorDark = '#ff6347';
+  } else if (progress < 37.5) {
+    // Day
+    themeColor = '#4b6cb7';
+    themeColorDark = '#182848';
+  } else if (progress < 50) {
+    // Afternoon
+    themeColor = '#FFA726';
+    themeColorDark = '#F57C00';
+  } else if (progress < 75) {
+    // Sunset
+    themeColor = '#FF6B6B';
+    themeColorDark = '#ee5253';
+  } else {
+    // Night
+    themeColor = '#1a2a6c';
+    themeColorDark = '#0c1445';
+  }
+
+  document.documentElement.style.setProperty('--theme-color', themeColor);
+  document.documentElement.style.setProperty('--theme-color-dark', themeColorDark);
+  
+  // Update todo container background
+  const todoContainer = document.getElementById('todo-container');
+  todoContainer.style.backgroundColor = `${progress < 75 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.7)'}`;
+}
+
+// Update the updateScene function
+function updateScene(progress) {
+  updateColors(progress);
+  updateThemeColors(progress);
+
+  const mountainColor = progress < 25 ? '#FF9966' :
+                        progress < 50 ? '#4b6cb7' :
+                        progress < 75 ? '#FF6B6B' :
+                        '#1a2a6c';
+  
+  gsap.to('#mountains', { fill: mountainColor, duration: 2 });
+
+  const houseScale = progress < 75 ? 1 : 0.8;
+  const houseY = progress < 75 ? 0 : 10;
+  gsap.to('#houses', { scale: houseScale, y: houseY, duration: 2 });
+
+  const nameY = progress < 75 ? -40 : -20;
+  gsap.to('#name', { y: nameY, duration: 1 });
+
+  if (progress < 75) {
+    gsap.to(sun, {
+      y: -Math.sin((progress / 75) * Math.PI) * 30,
+      duration: 0.5
+    });
+  } else {
+    gsap.to(moon, {
+      y: -Math.sin(((progress - 75) / 25) * Math.PI) * 20,
+      duration: 0.5
+    });
+  }
+
+  const moonPhase = (progress - 75) / 25;
+  gsap.to(moon, {
+    clipPath: `inset(0 ${moonPhase * 100}% 0 0)`,
+    duration: 0.5
+  });
+
+  const cloudOpacity = progress < 75 ? 1 : 0;
+  const starOpacity = progress >= 75 ? 1 : 0;
+  
+  gsap.to('.cloud', { opacity: cloudOpacity, duration: 0.5 });
+  gsap.to('.star', { opacity: starOpacity, duration: 0.5 });
+
+  rainbow.style.opacity = (progress < 75 && isRaining) ? 0.5 : 0;
+
+  const streamColor = progress < 25 ? '#87CEFA' :
+                      progress < 50 ? '#4FC3F7' :
+                      progress < 75 ? '#0288D1' :
+                      '#01579B';
+  gsap.to('#stream1, #stream2, #stream3', { stroke: streamColor, duration: 2 });
+
+  if (progress >= 75) {
+    if (witches.length === 0) {
+      witches = animateWitches();
+    }
+    witches.forEach(witch => witch.style.display = 'block');
+    
+    if (Math.random() < 0.1) createTrailingStar();
+  } else {
+    witches.forEach(witch => {
+      witch.style.display = 'none';
+    });
+  }
+}
 </script>
 </body>
 </html>
