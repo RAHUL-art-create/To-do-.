@@ -1437,11 +1437,15 @@ function loadTasks() {
 function loadSharedTasks() {
   const urlParams = new URLSearchParams(window.location.search);
   const sharedData = urlParams.get('share');
-  const sender = urlParams.get('sender') || 'Unknown';
+  const sender = decodeURIComponent(urlParams.get('sender') || 'Unknown');
   
   if (sharedData) {
     try {
-      const sharedTasks = JSON.parse(atob(sharedData));
+      const sharedTasks = JSON.parse(atob(sharedData)).map(task => ({
+        // Decode the text to restore emojis
+        text: decodeURIComponent(task.text),
+        checked: task.checked
+      }));
       
       // Show confirmation modal for shared tasks
       showSharedTasksConfirmation(sharedTasks, sender);
@@ -1496,11 +1500,17 @@ function showSharedTasksConfirmation(tasks, sender) {
 }
 
 shareSelectedTasksBtn.addEventListener('click', () => {
-  const tasksToShare = selectedTasks.map(task => ({ text: task.text, checked: task.checked }));
+  const tasksToShare = selectedTasks.map(task => ({ 
+    // Encode the text to handle emojis properly
+    text: encodeURIComponent(task.text),
+    checked: task.checked 
+  }));
+  
   const sharedData = btoa(JSON.stringify(tasksToShare));
-  const sender = name.textContent;
+  const sender = encodeURIComponent(name.textContent);
   const userId = localStorage.getItem('userId') || generateUserId();
-  const shareUrl = `${window.location.origin}${window.location.pathname}?share=${sharedData}&sender=${encodeURIComponent(sender)}&userId=${userId}`;
+  const shareUrl = `${window.location.origin}${window.location.pathname}?share=${sharedData}&sender=${sender}&userId=${userId}`;
+  
   multiShareLink.value = shareUrl;
   multiShareModal.style.display = 'block';
 });
